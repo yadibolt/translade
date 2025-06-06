@@ -1,0 +1,51 @@
+<?php
+
+function translade_theme($existing, $type, $theme, $path) {
+    // Base Page Theme
+    $theme_templates = [
+        'translate_base_page' => [
+            'variables' => [
+                'content' => NULL,
+            ],
+            'template' => 'translade-base-page',
+            'path' => $path . '/templates',
+        ],
+    ];
+
+    return $theme_templates;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function translade_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+    if ($form_id == 'node_article_edit_form') {
+        // get the form definitions
+        $form_entity = $form_state->getFormObject()->getEntity();
+        $definitions = $form_entity->getFieldDefinitions();
+        // loop through the field definitions and find those with translatable content
+        foreach ($definitions as $field_name => $def) {
+            $field_type = $def->getType();
+            if (in_array($field_type, this->get_supported_field_types())) {
+
+            }
+        }
+    }
+}
+
+/**
+ * Returns an array of field types that are supported for translation.
+ *
+ * @return array
+ *   An array of supported field types.
+ */
+function get_supported_field_types() {
+    // Translade currently supports main text formats
+    return [
+        'text',
+        'text_long',
+        'text_with_summary',
+    ];
+}
+
+?>

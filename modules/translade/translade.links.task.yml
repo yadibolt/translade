@@ -1,0 +1,4 @@
+translade.admin:
+  route_name: entity.translade.base
+  title: "Manage Translade"
+  base_route: entity.translade.base

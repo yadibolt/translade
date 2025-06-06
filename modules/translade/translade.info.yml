@@ -1,0 +1,4 @@
+name: Translade
+type: module
+description: "Allows AI translation for text based fields."
+core_version_requirement: "10.4.8"

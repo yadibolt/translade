@@ -1,0 +1,4 @@
+administer translade:
+  title: "Administer Translade"
+  description: "Allow access to Translade administration pages"
+  restrict access: true
