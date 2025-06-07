@@ -1,15 +1,7 @@
-entity.translade.base:
-  path: "/admin/config/system/translade"
-  defaults:
-    _title: "Translade"
-    _controller: 'Drupal\translade\Controller\BasePageController::render'
-  requirements:
-    _permission: "administer translade"
-
-entity.translade.configure:
+translade.configure:
   path: "/admin/config/system/translade/configure"
   defaults:
-    _title: "Configure Translade"
-    _entity_form: "translade.configure"
+    _title: "Translade Configuration"
+    _form: '\Drupal\translade\Form\SettingsForm'
   requirements:
     _permission: "administer translade"

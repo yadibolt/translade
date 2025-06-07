@@ -1,4 +1,4 @@
 translade.admin:
-  route_name: entity.translade.base
-  title: "Manage Translade"
-  base_route: entity.translade.base
+  route_name: translade.configure
+  title: "Configure Translade"
+  base_route: translade.configure

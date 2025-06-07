@@ -1,0 +1,15 @@
+transladejs:
+  version: 1.0
+  js:
+    js/translade.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once
+
+transladecss:
+  version: 1.0
+  css:
+    theme:
+      css/translade.admin.css: {}
+      css/translade.form.css: {}

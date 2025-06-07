@@ -1,5 +1,5 @@
 translade.admin:
   title: Translade
   description: "Configure AI translation to your liking."
-  route_name: entity.translade.base
+  route_name: translade.configure
   parent: system.admin_config_system
