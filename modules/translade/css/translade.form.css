@@ -1,0 +1,74 @@
+#translade-shadow-root-config {
+  display: none;
+}
+
+.translade-wrapper {
+  border: 2px solid black;
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  background-color: white;
+}
+
+.translade-wrapper h3 {
+  margin: 0.5rem 0;
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.translade-wrapper p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+#translade-languageFrom,
+#translade-languageTo {
+  background-color: black;
+  border: black;
+  color: rgb(225, 225, 225);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+}
+
+[class*="translade-field-"] {
+  position: relative;
+}
+
+[id*="translade-shadow-root-"] {
+  margin-bottom: 2rem;
+  margin-top: -1rem;
+}
+
+.translade-actions-wrapper {
+  display: flex;
+  width: fit-content;
+  border: 2px solid black;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.translade-actions-wrapper a {
+  display: flex;
+  width: 32px;
+  overflow: hidden;
+  text-align: center;
+  justify-content: center;
+}
+
+.translade-actions-wrapper a:hover {
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.translade-actions-wrapper a:nth-child(1) {
+  border-right: 1px solid black;
+}
+
+.translade-actions-wrapper a:nth-child(2) {
+  border-left: 1px solid black;
+}
+
+.translade-actions-wrapper a:nth-child(2) img {
+  width: 24px;
+}

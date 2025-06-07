@@ -12,6 +12,7 @@ function translade_theme($existing, $type, $theme, $path) {
  */
 function translade_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
     // get saved content types from config
+    $weight = 0;
     $config = \Drupal::config('translade.settings');
     $content_types = $config->get('content_types') ?: [];
 
@@ -20,6 +21,25 @@ function translade_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
             $form['#attached']['library'][] = 'translade/transladejs';
             $form['#attached']['library'][] = 'translade/transladecss';
 
+            $form['translade_shadow_root_mount'] = [
+                '#type' => 'markup',
+                '#markup' => '<div id="translade-mount-shadow-root"></div>',
+                '#weight' => -100,
+            ];
+
+            // add shadow DOM element for config
+            $form['translade_shadow_root_config'] = [
+                '#type' => 'textarea',
+                '#attributes' => [
+                    'id' => ['translade-shadow-root-config'],
+                ],
+                '#value' => json_encode([
+                    'languages' => $config->get('languages') ?: [],
+                    'form_id' => $form_id,
+                ]),
+                '#weight' => $weight++,
+            ];
+
             $form_entity = $form_state->getFormObject()->getEntity();
             $definitions = $form_entity->getFieldDefinitions();
 
@@ -27,7 +47,13 @@ function translade_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
                 $field_type = $def->getType();
                 if (in_array($field_type, get_supported_field_types())) {
                     // change class for js rendering
-                    $form[$field_name]['#attributes']['class'][] = 'translade-field translade-type-' . $field_type;
+                    // generate number uid + timestamp
+                    $uid = \Drupal\Component\Utility\Html::getClass($field_name . '-' . $form_entity->id() . '-' . time());
+                    $form[$field_name]['#attributes']['class'][] = 'translade-field-' . $uid . ' translade-type-' . $field_type;
+                    $form[$field_name]['translade_shadow_root'] = [
+                        '#type' => 'markup',
+                        '#markup' => '<div id=translade-shadow-root-'.$uid.'></div>',
+                    ];
                 }
             }
         }
