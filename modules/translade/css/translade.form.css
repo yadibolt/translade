@@ -72,3 +72,7 @@
 .translade-actions-wrapper a:nth-child(2) img {
   width: 24px;
 }
+
+.translade-shadow-data {
+  display: none;
+}

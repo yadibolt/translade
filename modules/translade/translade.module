@@ -70,6 +70,7 @@ function get_supported_field_types() {
     // Translade currently supports main text formats
     return [
         'string',
+        'string_long',
         'text',
         'text_long',
         'text_with_summary',

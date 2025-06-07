@@ -69,9 +69,249 @@
           );
           const transladeActions = getTransladeActions(fieldId);
           field.appendChild(transladeActions);
+
+          // shadow data for storing original input
+          const shadowData = document.createElement("div");
+          shadowData.dataset.targetField = "shadow-" + fieldId;
+          shadowData.classList.add("translade-shadow-data");
+
+          field.appendChild(shadowData);
+
+          // check for the type and set default data for shadow data
+          setShadowData(fieldId);
+        });
+
+        // attach event listeners
+        fields.forEach((mainField, _) => {
+          const fieldId = mainField.id.replaceAll(
+            "translade-shadow-root-",
+            "translade-field-"
+          );
+
+          let actionBack = mainField.querySelectorAll("a.back")[0];
+          let actionTranslate = mainField.querySelectorAll("a.translate")[0];
+
+          if (!actionBack || actionBack === undefined) return;
+          actionBack.addEventListener("click", (event) => {
+            event.preventDefault();
+            // take the shadow data, and insert them into the field
+            restoreFromShadowData(fieldId);
+          });
+
+          if (!actionTranslate || actionTranslate === undefined) return;
+          actionTranslate.addEventListener("click", (event) => {
+            event.preventDefault();
+            // update the shadow data
+            setShadowData(fieldId);
+
+            let shadowData = getShadowData(fieldId);
+            // TODO: Call API with shadowData for translation with loader, from lang to lang
+          });
         });
       });
     },
+  };
+
+  const setShadowData = (fieldId) => {
+    // get the item that has fieldId className
+    // it contains the type of field
+    const mainfield = document.querySelectorAll(
+      `div[data-target-field="shadow-${fieldId}"]`
+    )[0];
+    const subfield = document.getElementsByClassName(fieldId)[0];
+
+    if (!mainfield || mainfield === undefined) return;
+    if (!subfield || subfield === undefined) return;
+
+    const fieldTypeFull = Array.from(subfield.classList).find((className) =>
+      className.startsWith("translade-type-")
+    );
+
+    if (!fieldTypeFull || fieldTypeFull === undefined) return;
+
+    const fieldType = String(fieldTypeFull).replaceAll("translade-type-", "");
+    let input = "";
+    switch (fieldType) {
+      case "string":
+        input = getStringTypeValue(subfield);
+        break;
+      case "string_long":
+        input = getStringLongTypeValue(subfield);
+        break;
+      case "text":
+        input = getStringTypeValue(subfield);
+        break;
+      case "text_long":
+        input = getTextLongValue(subfield);
+        break;
+      case "text_with_summary":
+        input = getTextWithSummaryValue(subfield);
+        break;
+    }
+
+    mainfield.innerHTML = input;
+  };
+
+  const getShadowData = (fieldId) => {
+    const mainfield = document.querySelectorAll(
+      `div[data-target-field="shadow-${fieldId}"]`
+    )[0];
+
+    if (!mainfield || mainfield === undefined) return null;
+
+    return mainfield.innerHTML;
+  };
+
+  const restoreFromShadowData = (fieldId) => {
+    const mainfield = document.querySelectorAll(
+      `div[data-target-field="shadow-${fieldId}"]`
+    )[0];
+    const subfield = document.getElementsByClassName(fieldId)[0];
+
+    if (!mainfield || mainfield === undefined) return;
+    if (!subfield || subfield === undefined) return;
+
+    const fieldTypeFull = Array.from(subfield.classList).find((className) =>
+      className.startsWith("translade-type-")
+    );
+
+    if (!fieldTypeFull || fieldTypeFull === undefined) return;
+
+    const fieldType = String(fieldTypeFull).replaceAll("translade-type-", "");
+    switch (fieldType) {
+      case "string":
+        setStringTypeValue(subfield, mainfield.innerHTML);
+        break;
+      case "string_long":
+        setStringLongTypeValue(subfield, mainfield.innerHTML);
+        break;
+      case "text":
+        setStringTypeValue(subfield, mainfield.innerHTML);
+        break;
+      case "text_long":
+        setTextLongValue(subfield, mainfield.innerHTML);
+        break;
+      case "text_with_summary":
+        setTextWithSummaryValue(subfield, mainfield.innerHTML);
+        break;
+    }
+  };
+
+  const getStringTypeValue = (subfield) => {
+    const input = subfield.querySelectorAll("input")[0];
+    return String(input.value);
+  };
+
+  const setStringTypeValue = (subfield, newValue) => {
+    const input = subfield.querySelectorAll("input")[0];
+    input.value = String(newValue);
+  };
+
+  const getStringLongTypeValue = (subfield) => {
+    const input = subfield.querySelectorAll("textarea")[0];
+    return String(input.value);
+  };
+
+  const setStringLongTypeValue = (subfield, newValue) => {
+    const input = subfield.querySelectorAll("textarea")[0];
+    input.value = String(newValue);
+  };
+
+  const getTextWithSummaryValue = (subfield) => {
+    let textWithSummary = subfield.querySelectorAll(".form-textarea-wrapper");
+    let summaryFieldWrapper = textWithSummary[0];
+    let textFieldWrapper = textWithSummary[1];
+
+    const hasCKEditorEnabled =
+      textFieldWrapper.querySelectorAll("div.ck").length > 0;
+
+    if (hasCKEditorEnabled) {
+      const ckEditorValue =
+        textFieldWrapper.querySelectorAll(".ck .ck.ck-content")[0];
+      const summaryValue = summaryFieldWrapper.querySelectorAll("textarea")[0];
+
+      return summaryValue.value + "|TRANSLADE|" + ckEditorValue.innerHTML;
+    } else {
+      const ckEditorValue = textFieldWrapper.querySelectorAll("textarea")[0];
+      const summaryValue = summaryFieldWrapper.querySelectorAll("textarea")[0];
+
+      return summaryValue.value + "|TRANSLADE|" + ckEditorValue.value;
+    }
+  };
+
+  const setTextWithSummaryValue = (subfield, newValue) => {
+    let textWithSummary = subfield.querySelectorAll(".form-textarea-wrapper");
+    let summaryFieldWrapper = textWithSummary[0];
+    let textFieldWrapper = textWithSummary[1];
+
+    const hasCKEditorEnabled =
+      textFieldWrapper.querySelectorAll("div.ck").length > 0;
+
+    if (hasCKEditorEnabled) {
+      const summaryValue = summaryFieldWrapper.querySelectorAll("textarea")[0];
+      let newValueSplit = newValue.split("|TRANSLADE|");
+
+      // use ckeditor instance to update the dom
+      const editorElement = textFieldWrapper.querySelector(
+        ".ck-editor__editable"
+      );
+      const editorInstance = editorElement.ckeditorInstance;
+
+      summaryValue.value = String(newValueSplit[0]);
+      if (editorInstance) {
+        editorInstance.setData(String(newValueSplit[1]));
+      }
+    } else {
+      const ckEditorValue = textFieldWrapper.querySelectorAll("textarea")[0];
+      const summaryValue = summaryFieldWrapper.querySelectorAll("textarea")[0];
+
+      let newValueSplit = newValue.split("|TRANSLADE|");
+      summaryValue.value = String(newValueSplit[0]);
+      ckEditorValue.value = String(newValueSplit[1]);
+    }
+  };
+
+  const getTextLongValue = (subfield) => {
+    let textWithSummary = subfield.querySelectorAll(".form-textarea-wrapper");
+    let textFieldWrapper = textWithSummary[0];
+
+    const hasCKEditorEnabled =
+      textFieldWrapper.querySelectorAll("div.ck").length > 0;
+
+    if (hasCKEditorEnabled) {
+      const ckEditorValue =
+        textFieldWrapper.querySelectorAll(".ck .ck.ck-content")[0];
+
+      return ckEditorValue.innerHTML;
+    } else {
+      const ckEditorValue = textFieldWrapper.querySelectorAll("textarea")[0];
+
+      return ckEditorValue.value;
+    }
+  };
+
+  const setTextLongValue = (subfield, newValue) => {
+    let textWithSummary = subfield.querySelectorAll(".form-textarea-wrapper");
+    let textFieldWrapper = textWithSummary[0];
+
+    const hasCKEditorEnabled =
+      textFieldWrapper.querySelectorAll("div.ck").length > 0;
+
+    if (hasCKEditorEnabled) {
+      // use ckeditor instance to update the dom
+      const editorElement = textFieldWrapper.querySelector(
+        ".ck-editor__editable"
+      );
+      const editorInstance = editorElement.ckeditorInstance;
+
+      if (editorInstance) {
+        editorInstance.setData(String(newValue));
+      }
+    } else {
+      const ckEditorValue = textFieldWrapper.querySelectorAll("textarea")[0];
+
+      ckEditorValue.value = String(newValue);
+    }
   };
 
   const createLanguageOptionsSelect = (config, name, id) => {
