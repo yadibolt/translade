@@ -90,6 +90,7 @@
 
           let actionBack = mainField.querySelectorAll("a.back")[0];
           let actionTranslate = mainField.querySelectorAll("a.translate")[0];
+          let actionLoader = mainField.querySelectorAll("a.load")[0];
 
           if (!actionBack || actionBack === undefined) return;
           actionBack.addEventListener("click", (event) => {
@@ -106,10 +107,138 @@
 
             let shadowData = getShadowData(fieldId);
             // TODO: Call API with shadowData for translation with loader, from lang to lang
+            enableActionLoader(actionBack, actionTranslate, actionLoader);
+
+            return new Promise((resolve, reject) => {
+              const languageFrom = document.getElementById(
+                "translade-languageFrom"
+              );
+              if (!languageFrom || languageFrom === undefined)
+                reject("No Language Found.");
+              const languageTo = document.getElementById(
+                "translade-languageTo"
+              );
+              if (!languageTo || languageTo === undefined)
+                reject("No Language Found.");
+
+              if (String(languageFrom.value) === String(languageTo))
+                reject("Languages are the same.");
+
+              fetch("/api/translade/translate", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  form_id: String(config.form_id),
+                  text: String(shadowData),
+                  trigger_id: String(fieldId),
+                  source_lang: String(languageFrom.value),
+                  target_lang: String(languageTo.value),
+                }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (
+                    !data.form_id ||
+                    !data.source_lang ||
+                    !data.target_lang ||
+                    !data.status ||
+                    !data.translated_text ||
+                    !data.trigger_id
+                  ) {
+                    disableActionLoader(
+                      actionBack,
+                      actionTranslate,
+                      actionLoader
+                    );
+                    reject("Returned data do not follow the structure.");
+                  }
+
+                  setTranslatedData(data.trigger_id, data.translated_text);
+                  disableActionLoader(
+                    actionBack,
+                    actionTranslate,
+                    actionLoader
+                  );
+                  resolve(data);
+                })
+                .catch((e) => {
+                  disableActionLoader(
+                    actionBack,
+                    actionTranslate,
+                    actionLoader
+                  );
+                  reject(e);
+                });
+            });
           });
         });
       });
     },
+  };
+
+  const enableActionLoader = (actionBack, actionTranslate, actionLoad) => {
+    if (!actionBack || actionBack === undefined) return;
+    !actionBack.classList.contains("action-hide")
+      ? actionBack.classList.add("action-hide")
+      : null;
+    if (!actionTranslate || actionTranslate === undefined) return;
+    !actionTranslate.classList.contains("action-hide")
+      ? actionTranslate.classList.add("action-hide")
+      : null;
+
+    // show loader
+    if (!actionLoad || actionLoad === undefined) return;
+    actionLoad.classList.contains("action-hide")
+      ? actionLoad.classList.remove("action-hide")
+      : null;
+  };
+
+  const disableActionLoader = (actionBack, actionTranslate, actionLoad) => {
+    if (!actionBack || actionBack === undefined) return;
+    actionBack.classList.contains("action-hide")
+      ? actionBack.classList.remove("action-hide")
+      : null;
+    if (!actionTranslate || actionTranslate === undefined) return;
+    actionTranslate.classList.contains("action-hide")
+      ? actionTranslate.classList.remove("action-hide")
+      : null;
+
+    // hide loader
+    if (!actionLoad || actionLoad === undefined) return;
+    !actionLoad.classList.contains("action-hide")
+      ? actionLoad.classList.add("action-hide")
+      : null;
+  };
+
+  const setTranslatedData = (fieldId, newValue) => {
+    const subfield = document.getElementsByClassName(fieldId)[0];
+
+    const fieldTypeFull = Array.from(subfield.classList).find((className) =>
+      className.startsWith("translade-type-")
+    );
+
+    if (!fieldTypeFull || fieldTypeFull === undefined) return;
+
+    const fieldType = String(fieldTypeFull).replaceAll("translade-type-", "");
+    switch (fieldType) {
+      case "string":
+        setStringTypeValue(subfield, newValue);
+        break;
+      case "string_long":
+        setStringLongTypeValue(subfield, newValue);
+        break;
+      case "text":
+        setStringTypeValue(subfield, newValue);
+        break;
+      case "text_long":
+        setTextLongValue(subfield, newValue);
+        break;
+      case "text_with_summary":
+        setTextWithSummaryValue(subfield, newValue);
+        break;
+    }
   };
 
   const setShadowData = (fieldId) => {
@@ -343,6 +472,9 @@
     translateIcon.src = "/modules/translade/icons/translate.svg";
     translateIcon.alt = "Translate";
 
+    const loaderIcon = document.createElement("span");
+    loaderIcon.classList.add("loader");
+
     const aBack = document.createElement("a");
     aBack.classList.add(...["translade-action-trigger", "back"]);
     aBack.dataset.targetField = uid;
@@ -353,8 +485,16 @@
     aTranslate.dataset.targetField = uid;
     aTranslate.appendChild(translateIcon);
 
+    const aLoader = document.createElement("a");
+    aLoader.classList.add(
+      ...["translade-action-trigger", "load", "action-hide"]
+    );
+    aLoader.dataset.targetField = uid;
+    aLoader.appendChild(loaderIcon);
+
     actionsWrapper.appendChild(aBack);
     actionsWrapper.appendChild(aTranslate);
+    actionsWrapper.appendChild(aLoader);
 
     return actionsWrapper;
   };

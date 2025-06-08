@@ -5,3 +5,14 @@ translade.configure:
     _form: '\Drupal\translade\Form\SettingsForm'
   requirements:
     _permission: "administer translade"
+
+translade.api:
+  path: "/api/translade/translate"
+  defaults:
+    _title: "Translade API"
+    _controller: '\Drupal\translade\Controller\APIController::translate'
+  requirements:
+    _permission: "access content"
+  methods: [POST]
+  options:
+    no_cache: TRUE
