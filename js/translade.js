@@ -5,7 +5,7 @@
     attach: function (context, settings) {
       once("translade", "body", context).forEach(function (element) {
         const configHTML = document.getElementById(
-          "translade-shadow-root-config"
+          "translade-shadow-root-config",
         );
         if (
           !configHTML ||
@@ -27,7 +27,7 @@
 
         // Config OK. Create a select for languages in the shadow root
         const shadowRoot = document.getElementById(
-          "translade-mount-shadow-root"
+          "translade-mount-shadow-root",
         );
         if (!shadowRoot || shadowRoot === undefined) return;
 
@@ -40,12 +40,12 @@
         const languageFrom = createLanguageOptionsSelect(
           config,
           "translade-languageFrom",
-          "translade-languageFrom"
+          "translade-languageFrom",
         );
         const languageTo = createLanguageOptionsSelect(
           config,
           "translade-languageTo",
-          "translade-languageTo"
+          "translade-languageTo",
         );
 
         wrapper.appendChild(title);
@@ -58,14 +58,14 @@
 
         // get all the fields
         let fields = document.querySelectorAll(
-          'div[id*="translade-shadow-root-"]'
+          'div[id*="translade-shadow-root-"]',
         );
         if (!fields || fields === undefined) return;
 
         fields.forEach((field, _) => {
           const fieldId = field.id.replaceAll(
             "translade-shadow-root-",
-            "translade-field-"
+            "translade-field-",
           );
           const transladeActions = getTransladeActions(fieldId);
           field.appendChild(transladeActions);
@@ -85,7 +85,7 @@
         fields.forEach((mainField, _) => {
           const fieldId = mainField.id.replaceAll(
             "translade-shadow-root-",
-            "translade-field-"
+            "translade-field-",
           );
 
           let actionBack = mainField.querySelectorAll("a.back")[0];
@@ -111,12 +111,12 @@
 
             return new Promise((resolve, reject) => {
               const languageFrom = document.getElementById(
-                "translade-languageFrom"
+                "translade-languageFrom",
               );
               if (!languageFrom || languageFrom === undefined)
                 reject("No Language Found.");
               const languageTo = document.getElementById(
-                "translade-languageTo"
+                "translade-languageTo",
               );
               if (!languageTo || languageTo === undefined)
                 reject("No Language Found.");
@@ -150,7 +150,7 @@
                     disableActionLoader(
                       actionBack,
                       actionTranslate,
-                      actionLoader
+                      actionLoader,
                     );
                     reject("Returned data do not follow the structure.");
                   }
@@ -159,7 +159,7 @@
                   disableActionLoader(
                     actionBack,
                     actionTranslate,
-                    actionLoader
+                    actionLoader,
                   );
                   resolve(data);
                 })
@@ -167,7 +167,7 @@
                   disableActionLoader(
                     actionBack,
                     actionTranslate,
-                    actionLoader
+                    actionLoader,
                   );
                   reject(e);
                 });
@@ -215,13 +215,16 @@
   const setTranslatedData = (fieldId, newValue) => {
     const subfield = document.getElementsByClassName(fieldId)[0];
 
+    console.log(newValue);
+
     const fieldTypeFull = Array.from(subfield.classList).find((className) =>
-      className.startsWith("translade-type-")
+      className.startsWith("translade-type-"),
     );
 
     if (!fieldTypeFull || fieldTypeFull === undefined) return;
 
     const fieldType = String(fieldTypeFull).replaceAll("translade-type-", "");
+    console.log(fieldType);
     switch (fieldType) {
       case "string":
         setStringTypeValue(subfield, newValue);
@@ -245,7 +248,7 @@
     // get the item that has fieldId className
     // it contains the type of field
     const mainfield = document.querySelectorAll(
-      `div[data-target-field="shadow-${fieldId}"]`
+      `div[data-target-field="shadow-${fieldId}"]`,
     )[0];
     const subfield = document.getElementsByClassName(fieldId)[0];
 
@@ -253,7 +256,7 @@
     if (!subfield || subfield === undefined) return;
 
     const fieldTypeFull = Array.from(subfield.classList).find((className) =>
-      className.startsWith("translade-type-")
+      className.startsWith("translade-type-"),
     );
 
     if (!fieldTypeFull || fieldTypeFull === undefined) return;
@@ -283,7 +286,7 @@
 
   const getShadowData = (fieldId) => {
     const mainfield = document.querySelectorAll(
-      `div[data-target-field="shadow-${fieldId}"]`
+      `div[data-target-field="shadow-${fieldId}"]`,
     )[0];
 
     if (!mainfield || mainfield === undefined) return null;
@@ -293,7 +296,7 @@
 
   const restoreFromShadowData = (fieldId) => {
     const mainfield = document.querySelectorAll(
-      `div[data-target-field="shadow-${fieldId}"]`
+      `div[data-target-field="shadow-${fieldId}"]`,
     )[0];
     const subfield = document.getElementsByClassName(fieldId)[0];
 
@@ -301,7 +304,7 @@
     if (!subfield || subfield === undefined) return;
 
     const fieldTypeFull = Array.from(subfield.classList).find((className) =>
-      className.startsWith("translade-type-")
+      className.startsWith("translade-type-"),
     );
 
     if (!fieldTypeFull || fieldTypeFull === undefined) return;
@@ -359,12 +362,12 @@
         textFieldWrapper.querySelectorAll(".ck .ck.ck-content")[0];
       const summaryValue = summaryFieldWrapper.querySelectorAll("textarea")[0];
 
-      return summaryValue.value + "|TRANSLADE|" + ckEditorValue.innerHTML;
+      return summaryValue.value + "|TRSLD_SPT|" + ckEditorValue.innerHTML;
     } else {
       const ckEditorValue = textFieldWrapper.querySelectorAll("textarea")[0];
       const summaryValue = summaryFieldWrapper.querySelectorAll("textarea")[0];
 
-      return summaryValue.value + "|TRANSLADE|" + ckEditorValue.value;
+      return summaryValue.value + "|TRSLD_SPT|" + ckEditorValue.value;
     }
   };
 
@@ -378,11 +381,13 @@
 
     if (hasCKEditorEnabled) {
       const summaryValue = summaryFieldWrapper.querySelectorAll("textarea")[0];
-      let newValueSplit = newValue.split("|TRANSLADE|");
+      let newValueSplit = newValue.split("|TRSLD_SPT|");
+
+      console.log(newValueSplit);
 
       // use ckeditor instance to update the dom
       const editorElement = textFieldWrapper.querySelector(
-        ".ck-editor__editable"
+        ".ck-editor__editable",
       );
       const editorInstance = editorElement.ckeditorInstance;
 
@@ -394,7 +399,7 @@
       const ckEditorValue = textFieldWrapper.querySelectorAll("textarea")[0];
       const summaryValue = summaryFieldWrapper.querySelectorAll("textarea")[0];
 
-      let newValueSplit = newValue.split("|TRANSLADE|");
+      let newValueSplit = newValue.split("|TRSLD_SPT|");
       summaryValue.value = String(newValueSplit[0]);
       ckEditorValue.value = String(newValueSplit[1]);
     }
@@ -429,7 +434,7 @@
     if (hasCKEditorEnabled) {
       // use ckeditor instance to update the dom
       const editorElement = textFieldWrapper.querySelector(
-        ".ck-editor__editable"
+        ".ck-editor__editable",
       );
       const editorInstance = editorElement.ckeditorInstance;
 
@@ -487,7 +492,7 @@
 
     const aLoader = document.createElement("a");
     aLoader.classList.add(
-      ...["translade-action-trigger", "load", "action-hide"]
+      ...["translade-action-trigger", "load", "action-hide"],
     );
     aLoader.dataset.targetField = uid;
     aLoader.appendChild(loaderIcon);

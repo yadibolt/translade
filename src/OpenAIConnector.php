@@ -116,6 +116,7 @@ class OpenAIConnector {
         // Override prompt is not set, fallback to default.
         return "You are a helpful translation assistant.
         Your task is to translate the following content from @source_lang to @target_lang.
+        Do not translate |TRSLD_SPT| to anything else, it is a special tag that should remain unchanged.
 
         - Translate only the text content; do not modify or remove any HTML tags, special characters, or formatting.
         - Do not prepend or append any extra text to the translation.
