@@ -1,14 +1,8 @@
 <?php
 
-function translade_theme($existing, $type, $theme, $path) {
-    // Base Page Theme
-    $theme_templates = [];
-
-    return $theme_templates;
-}
-
 /**
  * Implements hook_form_FORM_ID_alter().
+ * We need to alter the node edit form depending on the content type and create shadow JS DOM for interaction.
  */
 function translade_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
     // get saved content types from config
@@ -47,7 +41,6 @@ function translade_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
                 $field_type = $def->getType();
                 if (in_array($field_type, get_supported_field_types())) {
                     // change class for js rendering
-                    // generate number uid + timestamp
                     $uid = \Drupal\Component\Utility\Html::getClass($field_name . '-' . $form_entity->id() . '-' . time());
                     $form[$field_name]['#attributes']['class'][] = 'translade-field-' . $uid . ' translade-type-' . $field_type;
                     $form[$field_name]['translade_shadow_root'] = [

@@ -11,16 +11,15 @@ class OpenAIConnector {
     /**
      * Creates a Guzzle HTTP client connection to the OpenAI API.
      *
-     * @param string $endpoint
-     *   The API endpoint to connect to.
-     *
      * @return \GuzzleHttp\Client|false
-     *   Returns a Guzzle HTTP client if the API key is set, otherwise false.
+     *   Returns a Guzzle HTTP client if the API key is set, otherwise false
      */
-    public function makeConnection($endpoint = '') {
+    public function makeConnection() {
         $config = \Drupal::config('translade.settings');
         $api_key = $config->get('api_key');
+
         if (empty($api_key)) {
+            \Drupal::logger('translade')->error('API key is not set in the configuration. Please set it in the Translade settings.');
             return false;
         }
 
@@ -39,40 +38,52 @@ class OpenAIConnector {
 
     /**
      * Executes a request to the OpenAI API.
+     * It is used to primarily send requests to the OpenAI API for translations
+     * and to fetch model list.
      *
      * @param \GuzzleHttp\Client $connection
-     *   The Guzzle HTTP client connection.
+     *   The Guzzle HTTP client connection
      * @param string $method
-     *   The HTTP method to use (GET, POST, etc.).
+     *   The HTTP method to use
      * @param array $data
-     *   The data to send with the request.
+     *   The data to send with the request e.g. JSON payload
      *
      * @return array|false
-     *   Returns the response as an associative array or false on failure.
+     *   Returns the response as an associative array or false on failure
      */
     public function executeRequest(\GuzzleHttp\Client $connection, $method = 'GET', $data = [], $endpoint = "models") {
         try {
+            // set the options headers
             $options = [
                 'headers' => [
                     'Accept' => 'application/json',
                 ],
             ];
 
+            // we add body if the method is not GET
             if ($method !== 'GET' && !empty($data)) {
                 $options['json'] = $data;
             }
             
             $request_response = $connection->request($method, $endpoint, $options);
             $response_body = (string) $request_response->getBody();
+
             return json_decode($response_body, true);
         } catch (\GuzzleHttp\Exception\RequestException $e) {
             \Drupal::logger('translade')->error('OpenAI API request failed: @message', [
                 '@message' => $e->getMessage()
             ]);
+
             return false;
         }
     }
 
+    /**
+     * Returns currently used model that is set in the Drupal configuration.
+     *
+     * @return string|null
+     *   The model name or 'gpt-4o-mini' as default if not set.
+     */
     public function getModel() {
         $config = \Drupal::config('translade.settings');
         $model = $config->get('model');
@@ -84,21 +95,42 @@ class OpenAIConnector {
 
     /**
      * Returns the OpenAI available models or false if the API key is not set.
+     * Note: This method fetches all the models, since there is no option to filter them by type.
+     * Make sure you select Language model and not any other type of model.
+     * You can look them up here: https://platform.openai.com/docs/models/overview
      *
      * @return array|false
      */
     public function getAvailableModels() {
         $openai_connection = $this->makeConnection();
+
         if (!$openai_connection) {
+            \Drupal::logger('translade')->error('Failed to create OpenAI connection. Please check your API key.');
             return false;
         }
 
         $response = $this->executeRequest($openai_connection, 'GET', []);
         if (isset($response['data']) && is_array($response['data'])) {
             return $response['data'];
+        } else {
+            \Drupal::logger('translade')->error('Failed to fetch available models from OpenAI API.');
+            return false;
         }
     }
 
+    /**
+     * Formats the translation prompt by replacing placeholders with actual values.
+     *
+     * @param string $prompt
+     *   The prompt template with placeholders.
+     * @param string $source_lang
+     *   The source language code.
+     * @param string $target_lang
+     *   The target language code.
+     *
+     * @return string
+     *   The formatted prompt.
+     */
     public function formatTranslationPrompt($prompt, $source_lang, $target_lang) {
         $formatted_prompt = str_replace('@source_lang', strtoupper($source_lang), $prompt);
         $formatted_prompt = str_replace('@target_lang', strtoupper($target_lang), $formatted_prompt);
@@ -106,9 +138,17 @@ class OpenAIConnector {
         return $formatted_prompt;
     }
 
+    /**
+     * Returns the translation prompt from the configuration.
+     * If the override prompt is set, that will be returned instead.
+     *
+     * @return string
+     *   The translation prompt.
+     */
     public function getTranslationPrompt() {
         $config = \Drupal::config('translade.settings');
         $override_prompt = $config->get('override_prompt');
+        
         if (!empty($override_prompt)) {
             return $override_prompt;
         }

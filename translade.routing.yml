@@ -12,7 +12,7 @@ translade.api:
     _title: "Translade API"
     _controller: '\Drupal\translade\Controller\APIController::translate'
   requirements:
-    _permission: "access content"
+    _permission: "administer translade"
   methods: [POST]
   options:
     no_cache: TRUE

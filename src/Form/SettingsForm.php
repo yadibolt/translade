@@ -1,4 +1,4 @@
-<?
+<?php
 
 namespace Drupal\translade\Form;
 
@@ -27,11 +27,12 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    // load the config with default values
-    $weight = 0;
     $form['#attached']['library'][] = 'translade/transladecss';
+
+    $weight = 0;
     $config = $this->config('translade.settings') ?: [];
 
+    // get the select options from the config
     $default_options = $this->prepareDefaultOptionsFromConfig($config);
 
     $form['openai'] = [
@@ -40,6 +41,7 @@ class SettingsForm extends ConfigFormBase {
       '#weight' => $weight++,
     ];
 
+    // truncate the API key for display purposes
     $truncated_api_key = $config->get('api_key') ? substr($config->get('api_key'), 0, 7) . '-*****-*****-' . substr($config->get('api_key'), -7, 7) : '';
 
     $form['openai']['api_working'] = [
@@ -61,22 +63,22 @@ class SettingsForm extends ConfigFormBase {
     ];
 
     if ($config->get('api_key') && !empty($config->get('api_key'))) {
-        $connector = new OpenAIConnector();
-        $models = $connector->getAvailableModels();
+      $connector = new OpenAIConnector();
+      $models = $connector->getAvailableModels();
 
-        $model_options = [];
-        foreach ($models as $model) {
-            $model_options[$model['id']] = $model['id'];
-        }
+      $model_options = [];
+      foreach ($models as $model) {
+          $model_options[$model['id']] = $model['id'];
+      }
 
-        $form['openai']['models'] = [
-            '#type' => 'select',
-            '#title' => $this->t('Select OpenAI Model'),
-            '#description' => $this->t('Select the OpenAI model you want to use for translations.'),
-            '#options' => $model_options,
-            '#default_value' => $config->get('model') ?: 'gpt-4o-mini',
-            '#weight' => $weight++,
-        ];
+      $form['openai']['models'] = [
+          '#type' => 'select',
+          '#title' => $this->t('Select OpenAI Model'),
+          '#description' => $this->t('Select the OpenAI model you want to use for translations.'),
+          '#options' => $model_options,
+          '#default_value' => $config->get('model') ?: 'gpt-4o-mini',
+          '#weight' => $weight++,
+      ];
     }
 
     $form['options'] = [
@@ -129,13 +131,13 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // Prompt
+    // prompt
     $prompt = $form_state->getValue('override_prompt');
     if (!empty($prompt) && strlen($prompt) < 10) {
       $form_state->setErrorByName('override_prompt', $this->t('The override prompt must be at least 10 characters long.'));
     }
 
-    // Language
+    // language
     $languages = $form_state->getValue('languages_area');
     if (!str_contains($languages, '|')) {
         $form_state->setErrorByName('languages_area', $this->t('Please ensure that each language is defined with a name and a code, separated by a pipe (|). For example: "en|English,fr|French".'));
@@ -151,24 +153,27 @@ class SettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->config('translade.settings');
 
-    // Content Types
+    // content types
     $selected_content_types = array_filter($form_state->getValue('content_types'));
 
+    // check configured content types against the submitted ones
     $ctypes = $this->prepareOptionsFromFormData($selected_content_types);
     $stypes = $this->prepareDefaultOptionsFromConfig($config);
     sort($ctypes);
     sort($stypes);
 
     if ($ctypes !== $stypes) {
-        $this->config('translade.settings')
-            ->set('content_types', $selected_content_types)
-            ->save();
+      // if the content types have changed, update the config, log the change
+      $this->config('translade.settings')
+          ->set('content_types', $selected_content_types)
+          ->save();
 
-        \Drupal::messenger()->addStatus($this->t('Translation content types have been updated.'));
+      \Drupal::messenger()->addStatus($this->t('Translation content types have been updated.'));
     }
 
-    // Api Key
+    // api key
     $api_key = $form_state->getValue('api_key');
+
     if (!empty($api_key)) {
       $this->config('translade.settings')
         ->set('api_key', $api_key)
@@ -176,18 +181,20 @@ class SettingsForm extends ConfigFormBase {
       \Drupal::messenger()->addStatus($this->t('OpenAI API key has been saved.'));
     }
 
-    // Model
+    // model
     $model = $form_state->getValue('models');
+
     if (!empty($model)) {
-        if ($model !== $this->config('translade.settings')->get('model')) {
-            $this->config('translade.settings')
-                ->set('model', $model)
-                ->save();
-            \Drupal::messenger()->addStatus($this->t('OpenAI model has been set to @model.', ['@model' => $model]));
-        }
+      if ($model !== $this->config('translade.settings')->get('model')) {
+        $this->config('translade.settings')
+            ->set('model', $model)
+            ->save();
+        \Drupal::messenger()->addStatus($this->t('OpenAI model has been set to @model.', ['@model' => $model]));
+      }
     }
 
-    // Override Prompt
+    // override prompt
+    // TODO optimize usecases for this
     $override_prompt = $form_state->getValue('override_prompt');
     if ($override_prompt !== $this->config('translade.settings')->get('override_prompt')) {
       $this->config('translade.settings')
@@ -196,7 +203,7 @@ class SettingsForm extends ConfigFormBase {
       \Drupal::messenger()->addStatus($this->t('Override translation prompt has been updated.'));
     }
 
-    // Languages
+    // languages
     $languages = $form_state->getValue('languages_area');
     if ($languages !== $this->config('translade.settings')->get('languages')) {
       $this->config('translade.settings')
@@ -215,12 +222,24 @@ class SettingsForm extends ConfigFormBase {
   public function getAvailableContentTypes() {
     $content_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
     $options = [];
+
     foreach ($content_types as $type) {
       $options[$type->id()] = $type->label();
     }
+    
     return $options;
   }
 
+  /**
+   * Prepares default checkbox options for the form.
+   * This method is utilized to get currently configured content types.
+   * 
+   * @param \Drupal\Core\Config\Config|null $config
+   *   Drupal configuration object.
+   * 
+   * @return array
+   *   An array of options for content types checkboxes.
+   */
   public function prepareDefaultOptionsFromConfig($config = NULL) {
     if ($config === NULL) {
         return [];
@@ -235,6 +254,15 @@ class SettingsForm extends ConfigFormBase {
     return $default_options;
   }
 
+  /**
+   * Prepares checkbox options from form data.
+   * 
+   * @param array|null $data
+   *   The form data to prepare options from.
+   * 
+   * @return array
+   *   An array of options for content types checkboxes.
+   */
   public function prepareOptionsFromFormData($data) {
     if ($data === NULL) {
         return [];

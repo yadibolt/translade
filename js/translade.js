@@ -3,6 +3,8 @@
 
   Drupal.behaviors.translade = {
     attach: function (context, settings) {
+      // use once to run this script only once
+      // since Drupal attaches it 5 times
       once("translade", "body", context).forEach(function (element) {
         const configHTML = document.getElementById(
           "translade-shadow-root-config",
@@ -16,21 +18,22 @@
         const configParse = JSON.parse(String(configHTML.value).trim());
         if (!configParse || configParse === undefined) return;
 
-        // Create struct
+        // create config struct
         const config = {
           languages: String(configParse.languages).trim().split(","),
           form_id: String(configParse.form_id),
         };
 
-        // Remove the config textarea, we do not need it anymore
+        // remove the config textarea, we do not need it anymore
         configHTML.remove();
 
-        // Config OK. Create a select for languages in the shadow root
+        // config OK. create a select for languages in the shadow root
         const shadowRoot = document.getElementById(
           "translade-mount-shadow-root",
         );
         if (!shadowRoot || shadowRoot === undefined) return;
 
+        // create the top box with lang selects
         const wrapper = document.createElement("div");
         wrapper.classList.add("translade-wrapper");
         const title = document.createElement("h3");
@@ -63,14 +66,16 @@
         if (!fields || fields === undefined) return;
 
         fields.forEach((field, _) => {
+          // we want to target the input field, not the 'shadow root' wrapper around it
           const fieldId = field.id.replaceAll(
             "translade-shadow-root-",
             "translade-field-",
           );
-          const transladeActions = getTransladeActions(fieldId);
-          field.appendChild(transladeActions);
+          const transladeActions = getTransladeActions(fieldId); // get actions e.g. back, translate, loading state
+          field.appendChild(transladeActions); // add them to the DOM
 
-          // shadow data for storing original input
+          // shadow data are for storing the current input of <input> element
+          // so user is able to go back one step
           const shadowData = document.createElement("div");
           shadowData.dataset.targetField = "shadow-" + fieldId;
           shadowData.classList.add("translade-shadow-data");
@@ -83,15 +88,18 @@
 
         // attach event listeners
         fields.forEach((mainField, _) => {
+          // again, we target the fields inside the wrapper
           const fieldId = mainField.id.replaceAll(
             "translade-shadow-root-",
             "translade-field-",
           );
 
+          // target the actions and create event listeners for them
           let actionBack = mainField.querySelectorAll("a.back")[0];
           let actionTranslate = mainField.querySelectorAll("a.translate")[0];
           let actionLoader = mainField.querySelectorAll("a.load")[0];
 
+          // -- back action
           if (!actionBack || actionBack === undefined) return;
           actionBack.addEventListener("click", (event) => {
             event.preventDefault();
@@ -99,22 +107,24 @@
             restoreFromShadowData(fieldId);
           });
 
+          // -- translate action
           if (!actionTranslate || actionTranslate === undefined) return;
           actionTranslate.addEventListener("click", (event) => {
             event.preventDefault();
             // update the shadow data
-            setShadowData(fieldId);
-
-            let shadowData = getShadowData(fieldId);
-            // TODO: Call API with shadowData for translation with loader, from lang to lang
+            let shadowData = getShadowData(fieldId); // get the data from <input>, <textarea> etc.
+            setShadowData(fieldId); // set the current data from <input>, <textarea> etc. to shadow data DOM element
             enableActionLoader(actionBack, actionTranslate, actionLoader);
 
+            // return a promise, fetch the data
             return new Promise((resolve, reject) => {
+              // get the languages
               const languageFrom = document.getElementById(
                 "translade-languageFrom",
               );
               if (!languageFrom || languageFrom === undefined)
                 reject("No Language Found.");
+
               const languageTo = document.getElementById(
                 "translade-languageTo",
               );
@@ -124,6 +134,7 @@
               if (String(languageFrom.value) === String(languageTo))
                 reject("Languages are the same.");
 
+              // fetch the API
               fetch("/api/translade/translate", {
                 method: "POST",
                 headers: {
@@ -155,6 +166,7 @@
                     reject("Returned data do not follow the structure.");
                   }
 
+                  // set the translated data for data.trigger_id
                   setTranslatedData(data.trigger_id, data.translated_text);
                   disableActionLoader(
                     actionBack,
@@ -178,6 +190,15 @@
     },
   };
 
+  /**
+   * Enables the visual loader.
+   *
+   * @param {HTMLLinkElement} actionBack
+   * @param {HTMLLinkElement} actionTranslate
+   * @param {HTMLLinkElement} actionLoad
+   *
+   * @returns {null}
+   */
   const enableActionLoader = (actionBack, actionTranslate, actionLoad) => {
     if (!actionBack || actionBack === undefined) return;
     !actionBack.classList.contains("action-hide")
@@ -193,8 +214,19 @@
     actionLoad.classList.contains("action-hide")
       ? actionLoad.classList.remove("action-hide")
       : null;
+
+    return null;
   };
 
+  /**
+   * Disables the visual loader.
+   *
+   * @param {HTMLLinkElement} actionBack
+   * @param {HTMLLinkElement} actionTranslate
+   * @param {HTMLLinkElement} actionLoad
+   *
+   * @returns {null}
+   */
   const disableActionLoader = (actionBack, actionTranslate, actionLoad) => {
     if (!actionBack || actionBack === undefined) return;
     actionBack.classList.contains("action-hide")
@@ -210,12 +242,20 @@
     !actionLoad.classList.contains("action-hide")
       ? actionLoad.classList.add("action-hide")
       : null;
+
+    return null;
   };
 
+  /**
+   * Sets translated data from API to fieldId HTMLElement.
+   *
+   * @param {string} fieldId - fieldId of a field to change its value
+   * @param {string} newValue - translated text
+   *
+   * @returns {null}
+   */
   const setTranslatedData = (fieldId, newValue) => {
     const subfield = document.getElementsByClassName(fieldId)[0];
-
-    console.log(newValue);
 
     const fieldTypeFull = Array.from(subfield.classList).find((className) =>
       className.startsWith("translade-type-"),
@@ -224,7 +264,7 @@
     if (!fieldTypeFull || fieldTypeFull === undefined) return;
 
     const fieldType = String(fieldTypeFull).replaceAll("translade-type-", "");
-    console.log(fieldType);
+
     switch (fieldType) {
       case "string":
         setStringTypeValue(subfield, newValue);
@@ -242,11 +282,19 @@
         setTextWithSummaryValue(subfield, newValue);
         break;
     }
+
+    return null;
   };
 
+  /**
+   * Sets data from <input>, <textarea> etc. to shadow data of its fieldId.
+   *
+   * @param {string} fieldId - fieldId of a field
+   *
+   * @returns {null}
+   */
   const setShadowData = (fieldId) => {
-    // get the item that has fieldId className
-    // it contains the type of field
+    // get the item that has fieldId className, it contains the type of field
     const mainfield = document.querySelectorAll(
       `div[data-target-field="shadow-${fieldId}"]`,
     )[0];
@@ -281,9 +329,19 @@
         break;
     }
 
+    // set the input
     mainfield.innerHTML = input;
+
+    return null;
   };
 
+  /**
+   * Gets the fieldIds Shadow data.
+   *
+   * @param {string} fieldId - fieldId of a field
+   *
+   * @returns {string} - the value of fieldIds Shadow Data
+   */
   const getShadowData = (fieldId) => {
     const mainfield = document.querySelectorAll(
       `div[data-target-field="shadow-${fieldId}"]`,
@@ -294,6 +352,13 @@
     return mainfield.innerHTML;
   };
 
+  /**
+   * Sets data from shadow data to <input>, <textarea> etc. of its fieldId.
+   *
+   * @param {string} fieldId - fieldId of a field
+   *
+   * @returns {null}
+   */
   const restoreFromShadowData = (fieldId) => {
     const mainfield = document.querySelectorAll(
       `div[data-target-field="shadow-${fieldId}"]`,
@@ -327,28 +392,67 @@
         setTextWithSummaryValue(subfield, mainfield.innerHTML);
         break;
     }
+
+    return null;
   };
 
+  /**
+   * Gets the value from String type value.
+   *
+   * @param {HTMLElement} subfield
+   *
+   * @returns {string}
+   */
   const getStringTypeValue = (subfield) => {
     const input = subfield.querySelectorAll("input")[0];
     return String(input.value);
   };
 
+  /**
+   * Sets the value to String type value.
+   *
+   * @param {HTMLElement} subfield
+   * @param {string} newValue
+   *
+   * @returns {string}
+   */
   const setStringTypeValue = (subfield, newValue) => {
     const input = subfield.querySelectorAll("input")[0];
     input.value = String(newValue);
   };
 
+  /**
+   * Gets the value from StringLong type value.
+   *
+   * @param {HTMLElement} subfield
+   *
+   * @returns {string}
+   */
   const getStringLongTypeValue = (subfield) => {
     const input = subfield.querySelectorAll("textarea")[0];
     return String(input.value);
   };
 
+  /**
+   * Sets the value to StringLong type value.
+   *
+   * @param {HTMLElement} subfield
+   * @param {string} newValue
+   *
+   * @returns {string}
+   */
   const setStringLongTypeValue = (subfield, newValue) => {
     const input = subfield.querySelectorAll("textarea")[0];
     input.value = String(newValue);
   };
 
+  /**
+   * Gets the value from TextWithSummary type value.
+   *
+   * @param {HTMLElement} subfield
+   *
+   * @returns {string}
+   */
   const getTextWithSummaryValue = (subfield) => {
     let textWithSummary = subfield.querySelectorAll(".form-textarea-wrapper");
     let summaryFieldWrapper = textWithSummary[0];
@@ -371,6 +475,14 @@
     }
   };
 
+  /**
+   * Sets the value to TextWithSummary type value.
+   *
+   * @param {HTMLElement} subfield
+   * @param {string} newValue
+   *
+   * @returns {string}
+   */
   const setTextWithSummaryValue = (subfield, newValue) => {
     let textWithSummary = subfield.querySelectorAll(".form-textarea-wrapper");
     let summaryFieldWrapper = textWithSummary[0];
@@ -382,8 +494,6 @@
     if (hasCKEditorEnabled) {
       const summaryValue = summaryFieldWrapper.querySelectorAll("textarea")[0];
       let newValueSplit = newValue.split("|TRSLD_SPT|");
-
-      console.log(newValueSplit);
 
       // use ckeditor instance to update the dom
       const editorElement = textFieldWrapper.querySelector(
@@ -405,6 +515,13 @@
     }
   };
 
+  /**
+   * Gets the value from TextLong type value.
+   *
+   * @param {HTMLElement} subfield
+   *
+   * @returns {string}
+   */
   const getTextLongValue = (subfield) => {
     let textWithSummary = subfield.querySelectorAll(".form-textarea-wrapper");
     let textFieldWrapper = textWithSummary[0];
@@ -424,6 +541,14 @@
     }
   };
 
+  /**
+   * Sets the value to TextLong type value.
+   *
+   * @param {HTMLElement} subfield
+   * @param {string} newValue
+   *
+   * @returns {string}
+   */
   const setTextLongValue = (subfield, newValue) => {
     let textWithSummary = subfield.querySelectorAll(".form-textarea-wrapper");
     let textFieldWrapper = textWithSummary[0];
@@ -448,6 +573,15 @@
     }
   };
 
+  /**
+   * Creates language select from config.
+   *
+   * @param {Object} config - Configuration object
+   * @param {string} name - Name of an option
+   * @param {string} id - ID of an option
+   *
+   * @returns {HTMLSelectElement}
+   */
   const createLanguageOptionsSelect = (config, name, id) => {
     const select = document.createElement("select");
     select.id = id;
@@ -461,10 +595,25 @@
     return select;
   };
 
+  /**
+   * Creates language options for select from config.
+   *
+   * @param {Object} value - Configuration object
+   * @param {string} name - Name of an option
+   *
+   * @returns {HTMLOptionElement} - NOTE: as string
+   */
   const getOptionTag = (value, name) => {
     return `<option value="${value}">${name}</option>`;
   };
 
+  /**
+   * Creates a div with all neccessary action elements
+   *
+   * @param {string} uid - uid of a collection
+   *
+   * @returns {HTMLDivElement}
+   */
   const getTransladeActions = (uid) => {
     const actionsWrapper = document.createElement("div");
     actionsWrapper.classList.add("translade-actions-wrapper");
