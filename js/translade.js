@@ -455,8 +455,16 @@
    */
   const getTextWithSummaryValue = (subfield) => {
     let textWithSummary = subfield.querySelectorAll(".form-textarea-wrapper");
-    let summaryFieldWrapper = textWithSummary[0];
-    let textFieldWrapper = textWithSummary[1];
+    let summaryFieldWrapper = null;
+    let textFieldWrapper = null;
+
+    if (textWithSummary.length === 1) {
+      // in case of e-commerce body
+      textFieldWrapper = textWithSummary[0];
+    } else {
+      summaryFieldWrapper = textWithSummary[0];
+      textFieldWrapper = textWithSummary[1];
+    }
 
     const hasCKEditorEnabled =
       textFieldWrapper.querySelectorAll("div.ck").length > 0;
@@ -464,12 +472,12 @@
     if (hasCKEditorEnabled) {
       const ckEditorValue =
         textFieldWrapper.querySelectorAll(".ck .ck.ck-content")[0];
-      const summaryValue = summaryFieldWrapper.querySelectorAll("textarea")[0];
+      const summaryValue = summaryFieldWrapper !== null ? summaryFieldWrapper.querySelectorAll("textarea")[0] : "";
 
       return summaryValue.value + "|TRSLD_SPT|" + ckEditorValue.innerHTML;
     } else {
       const ckEditorValue = textFieldWrapper.querySelectorAll("textarea")[0];
-      const summaryValue = summaryFieldWrapper.querySelectorAll("textarea")[0];
+      const summaryValue = summaryFieldWrapper !== null ? summaryFieldWrapper.querySelectorAll("textarea")[0] : "";
 
       return summaryValue.value + "|TRSLD_SPT|" + ckEditorValue.value;
     }
@@ -485,33 +493,53 @@
    */
   const setTextWithSummaryValue = (subfield, newValue) => {
     let textWithSummary = subfield.querySelectorAll(".form-textarea-wrapper");
-    let summaryFieldWrapper = textWithSummary[0];
-    let textFieldWrapper = textWithSummary[1];
+    let textFieldWrapper = null;
+    let summaryFieldWrapper = null;
+
+    if (textWithSummary.length === 1) {
+      // in case of e-commerce body
+      textFieldWrapper = textWithSummary[0];
+    } else {
+      summaryFieldWrapper = textWithSummary[0];
+      textFieldWrapper = textWithSummary[1];
+    }
 
     const hasCKEditorEnabled =
       textFieldWrapper.querySelectorAll("div.ck").length > 0;
 
     if (hasCKEditorEnabled) {
-      const summaryValue = summaryFieldWrapper.querySelectorAll("textarea")[0];
+      const summaryValue = summaryFieldWrapper ? summaryFieldWrapper.querySelectorAll("textarea")[0] : "";
       let newValueSplit = newValue.split("|TRSLD_SPT|");
 
-      // use ckeditor instance to update the dom
+      // use ckeditor instance to update the DOM
       const editorElement = textFieldWrapper.querySelector(
         ".ck-editor__editable",
       );
       const editorInstance = editorElement.ckeditorInstance;
 
-      summaryValue.value = String(newValueSplit[0]);
-      if (editorInstance) {
-        editorInstance.setData(String(newValueSplit[1]));
+      if (textWithSummary.length === 1) {
+        if (editorInstance) {
+          editorInstance.setData(String(newValueSplit[1]));
+        }
+      } else {
+        summaryValue.value = String(newValueSplit[0]);
+        if (editorInstance) {
+          editorInstance.setData(String(newValueSplit[1]));
+        }
       }
     } else {
       const ckEditorValue = textFieldWrapper.querySelectorAll("textarea")[0];
-      const summaryValue = summaryFieldWrapper.querySelectorAll("textarea")[0];
+      const summaryValue = summaryFieldWrapper ? summaryFieldWrapper.querySelectorAll("textarea")[0] : null;
 
       let newValueSplit = newValue.split("|TRSLD_SPT|");
-      summaryValue.value = String(newValueSplit[0]);
-      ckEditorValue.value = String(newValueSplit[1]);
+
+      if (summaryValue === null) {
+        // e-commerce
+        ckEditorValue.value = String(newValueSplit[1]);
+      } else {
+        summaryValue.value = String(newValueSplit[0]);
+        ckEditorValue.value = String(newValueSplit[1]);
+      }
     }
   };
 

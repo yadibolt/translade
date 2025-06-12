@@ -10,8 +10,11 @@ function translade_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
     $config = \Drupal::config('translade.settings');
     $content_types = $config->get('content_types') ?: [];
 
+    $form_shorthand_type = "node_";
+    if (str_contains($form_id, 'commerce_product')) $form_shorthand_type = "commerce_product_";
+
     foreach ($content_types as $content_type) {
-        if ($form_id == 'node_' . $content_type . '_edit_form') {
+        if ($form_id == $form_shorthand_type . $content_type . '_edit_form') {
             $form['#attached']['library'][] = 'translade/transladejs';
             $form['#attached']['library'][] = 'translade/transladecss';
 

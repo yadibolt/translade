@@ -2,9 +2,11 @@
 
 namespace Drupal\translade\Form;
 
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\translade\OpenAIConnector;
+use Drupal\commerce_product\Entity\ProductVariationType;
 
 class SettingsForm extends ConfigFormBase {
   /**
@@ -32,9 +34,6 @@ class SettingsForm extends ConfigFormBase {
     $weight = 0;
     $config = $this->config('translade.settings') ?: [];
 
-    // get the select options from the config
-    $default_options = $this->prepareDefaultOptionsFromConfig($config);
-
     $form['openai'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('OpenAI Connector'),
@@ -46,8 +45,8 @@ class SettingsForm extends ConfigFormBase {
 
     $form['openai']['api_working'] = [
         '#type' => 'markup',
-        '#markup' => $config->get('api_key') ? 
-            "<p class='translade-apikey-success'>".$this->t('OpenAI API key is set to ') . '<span>' . $truncated_api_key . "</span></p>" : 
+        '#markup' => $config->get('api_key') ?
+            "<p class='translade-apikey-success'>".$this->t('OpenAI API key is set to ') . '<span>' . $truncated_api_key . "</span></p>" :
             "<p class='translade-apikey-error'>".$this->t('OpenAI API key is not set. Please enter your OpenAI API key to enable translation services.')."</p>",
         '#allowed_tags' => ['p', 'span'],
         '#weight' => $weight++,
@@ -123,7 +122,7 @@ class SettingsForm extends ConfigFormBase {
       '#value' => $this->t('Save'),
       '#weight' => $weight++,
     ];
-    
+
     return $form;
   }
 
@@ -220,46 +219,57 @@ class SettingsForm extends ConfigFormBase {
    *   An array of supported field types.
    */
   public function getAvailableContentTypes() {
-    $content_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
     $options = [];
+    $module_handler = \Drupal::service('module_handler');
 
+    // check if e-commerce module is enabled
+    if ($module_handler->moduleExists('commerce')) {
+      $commerce_types = ProductVariationType::loadMultiple();
+      // add e-commerce content types
+      foreach($commerce_types as $type) {
+        $options[$type->id()] = $type->label();
+      }
+    }
+
+    $content_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
+    // add normal types
     foreach ($content_types as $type) {
       $options[$type->id()] = $type->label();
     }
-    
+
     return $options;
   }
 
   /**
    * Prepares default checkbox options for the form.
    * This method is utilized to get currently configured content types.
-   * 
+   *
    * @param \Drupal\Core\Config\Config|null $config
    *   Drupal configuration object.
-   * 
+   *
    * @return array
    *   An array of options for content types checkboxes.
    */
   public function prepareDefaultOptionsFromConfig($config = NULL) {
     if ($config === NULL) {
-        return [];
+      return [];
     }
 
     $default_options = $config->get('content_types') ?: [];
-    
+
     if (!is_array($default_options)) {
       $default_options = [];
     }
-    
+
     return $default_options;
   }
 
   /**
    * Prepares checkbox options from form data.
-   * 
+   *
    * @param array|null $data
    *   The form data to prepare options from.
-   * 
+   *
    * @return array
    *   An array of options for content types checkboxes.
    */
@@ -269,11 +279,11 @@ class SettingsForm extends ConfigFormBase {
     }
 
     $default_options = $data ?: [];
-    
+
     if (!is_array($default_options)) {
       $default_options = [];
     }
-    
+
     return $default_options;
   }
 }
