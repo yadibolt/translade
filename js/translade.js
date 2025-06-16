@@ -6,6 +6,11 @@
       // use once to run this script only once
       // since Drupal attaches it 5 times
       once("translade", "body", context).forEach(function (element) {
+        window.transladeHistory = {
+          maximumHistoryLength: 10,
+          history: {},
+        }
+
         const configHTML = document.getElementById(
           "translade-shadow-root-config",
         );
@@ -73,17 +78,7 @@
           );
           const transladeActions = getTransladeActions(fieldId); // get actions e.g. back, translate, loading state
           field.appendChild(transladeActions); // add them to the DOM
-
-          // shadow data are for storing the current input of <input> element
-          // so user is able to go back one step
-          const shadowData = document.createElement("div");
-          shadowData.dataset.targetField = "shadow-" + fieldId;
-          shadowData.classList.add("translade-shadow-data");
-
-          field.appendChild(shadowData);
-
-          // check for the type and set default data for shadow data
-          setShadowData(fieldId);
+          setHistoryData(fieldId);
         });
 
         // attach event listeners
@@ -103,17 +98,16 @@
           if (!actionBack || actionBack === undefined) return;
           actionBack.addEventListener("click", (event) => {
             event.preventDefault();
-            // take the shadow data, and insert them into the field
-            restoreFromShadowData(fieldId);
+            restoreFromHistory(fieldId);
           });
 
           // -- translate action
           if (!actionTranslate || actionTranslate === undefined) return;
           actionTranslate.addEventListener("click", (event) => {
             event.preventDefault();
-            // update the shadow data
-            let shadowData = getShadowData(fieldId); // get the data from <input>, <textarea> etc.
-            setShadowData(fieldId); // set the current data from <input>, <textarea> etc. to shadow data DOM element
+
+            let historyRecord = getLastHistoryRecord(fieldId);
+            setHistoryData(fieldId);
             enableActionLoader(actionBack, actionTranslate, actionLoader);
 
             // return a promise, fetch the data
@@ -142,7 +136,7 @@
                 },
                 body: JSON.stringify({
                   form_id: String(config.form_id),
-                  text: String(shadowData),
+                  text: String(historyRecord),
                   trigger_id: String(fieldId),
                   source_lang: String(languageFrom.value),
                   target_lang: String(languageTo.value),
@@ -286,21 +280,11 @@
     return null;
   };
 
-  /**
-   * Sets data from <input>, <textarea> etc. to shadow data of its fieldId.
-   *
-   * @param {string} fieldId - fieldId of a field
-   *
-   * @returns {null}
-   */
-  const setShadowData = (fieldId) => {
+  const setHistoryData = (fieldId) => {
+    const history = window.transladeHistory.history;
     // get the item that has fieldId className, it contains the type of field
-    const mainfield = document.querySelectorAll(
-      `div[data-target-field="shadow-${fieldId}"]`,
-    )[0];
     const subfield = document.getElementsByClassName(fieldId)[0];
 
-    if (!mainfield || mainfield === undefined) return;
     if (!subfield || subfield === undefined) return;
 
     const fieldTypeFull = Array.from(subfield.classList).find((className) =>
@@ -329,72 +313,54 @@
         break;
     }
 
-    // set the input
-    mainfield.innerHTML = input;
+    // create an object with key as fieldId and value as input
+    if (!history[fieldId] || history[fieldId] === undefined) {
+      history[fieldId.toString()] = [input];
+    } else {
+      if (history[fieldId.toString()].length >= window.transladeHistory.maximumHistoryLength) {
+        // remove first element if the limit is reached
+        history[fieldId.toString()].shift();
+      }
+      history[fieldId.toString()].push(input);
+    }
+    window.transladeHistory.history = history;
 
-    return null;
-  };
+    console.log(window.transladeHistory);
+  }
 
-  /**
-   * Gets the fieldIds Shadow data.
-   *
-   * @param {string} fieldId - fieldId of a field
-   *
-   * @returns {string} - the value of fieldIds Shadow Data
-   */
-  const getShadowData = (fieldId) => {
-    const mainfield = document.querySelectorAll(
-      `div[data-target-field="shadow-${fieldId}"]`,
-    )[0];
+  const getLastHistoryRecord = (fieldId) => {
+    const history = window.transladeHistory.history;
 
-    if (!mainfield || mainfield === undefined) return null;
+    if (!history || history === undefined) return null;
+    if (!history[fieldId] || history[fieldId] === undefined) return null;
 
-    return mainfield.innerHTML;
-  };
+    // get the last item in the array
+    const lastItem = history[fieldId][history[fieldId].length - 1];
 
-  /**
-   * Sets data from shadow data to <input>, <textarea> etc. of its fieldId.
-   *
-   * @param {string} fieldId - fieldId of a field
-   *
-   * @returns {null}
-   */
-  const restoreFromShadowData = (fieldId) => {
-    const mainfield = document.querySelectorAll(
-      `div[data-target-field="shadow-${fieldId}"]`,
-    )[0];
-    const subfield = document.getElementsByClassName(fieldId)[0];
+    return lastItem;
+  }
 
-    if (!mainfield || mainfield === undefined) return;
-    if (!subfield || subfield === undefined) return;
+  const restoreFromHistory = (fieldId) => {
+    const history = window.transladeHistory.history;
 
-    const fieldTypeFull = Array.from(subfield.classList).find((className) =>
-      className.startsWith("translade-type-"),
-    );
+    if (!history || history === undefined) return null;
+    if (!history[fieldId] || history[fieldId] === undefined) return null;
 
-    if (!fieldTypeFull || fieldTypeFull === undefined) return;
-
-    const fieldType = String(fieldTypeFull).replaceAll("translade-type-", "");
-    switch (fieldType) {
-      case "string":
-        setStringTypeValue(subfield, mainfield.innerHTML);
-        break;
-      case "string_long":
-        setStringLongTypeValue(subfield, mainfield.innerHTML);
-        break;
-      case "text":
-        setStringTypeValue(subfield, mainfield.innerHTML);
-        break;
-      case "text_long":
-        setTextLongValue(subfield, mainfield.innerHTML);
-        break;
-      case "text_with_summary":
-        setTextWithSummaryValue(subfield, mainfield.innerHTML);
-        break;
+    // get the last item in the array and remove it
+    const lastItem = history[fieldId][history[fieldId].length - 1];
+    if (history[fieldId].length > 1) {
+      history[fieldId].pop();
     }
 
+    window.transladeHistory.history = history;
+
+    console.log(window.transladeHistory.history);
+
+    // reuse fn to restore the data
+    setTranslatedData(fieldId, lastItem);
+
     return null;
-  };
+  }
 
   /**
    * Gets the value from String type value.
