@@ -6,11 +6,22 @@ translade.configure:
   requirements:
     _permission: "administer translade"
 
-translade.api:
+translade.api.translate:
   path: "/api/translade/translate"
   defaults:
     _title: "Translade API"
     _controller: '\Drupal\translade\Controller\APIController::translate'
+  requirements:
+    _permission: "administer translade"
+  methods: [POST]
+  options:
+    no_cache: TRUE
+
+translade.api.rephrase:
+  path: "/api/translade/rephrase"
+  defaults:
+    _title: "Translade API"
+    _controller: '\Drupal\translade\Controller\APIController::rephrase'
   requirements:
     _permission: "administer translade"
   methods: [POST]

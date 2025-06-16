@@ -64,7 +64,7 @@ class OpenAIConnector {
             if ($method !== 'GET' && !empty($data)) {
                 $options['json'] = $data;
             }
-            
+
             $request_response = $connection->request($method, $endpoint, $options);
             $response_body = (string) $request_response->getBody();
 
@@ -131,11 +131,22 @@ class OpenAIConnector {
      * @return string
      *   The formatted prompt.
      */
-    public function formatTranslationPrompt($prompt, $source_lang, $target_lang) {
+    public function formatTranslationPrompt($prompt, $source_lang, $target_lang): string {
         $formatted_prompt = str_replace('@source_lang', strtoupper($source_lang), $prompt);
         $formatted_prompt = str_replace('@target_lang', strtoupper($target_lang), $formatted_prompt);
 
         return $formatted_prompt;
+    }
+
+  /**
+   * Formats the rephrase prompt by replacing the source language placeholder.
+   *
+   * @param $prompt
+   * @param $source_lang
+   * @return string
+   */
+    public function formatRephrasePrompt($prompt, $source_lang): string {
+        return str_replace('@source_lang', strtoupper($source_lang), $prompt);
     }
 
     /**
@@ -145,10 +156,10 @@ class OpenAIConnector {
      * @return string
      *   The translation prompt.
      */
-    public function getTranslationPrompt() {
+    public function getTranslationPrompt(): string {
         $config = \Drupal::config('translade.settings');
         $override_prompt = $config->get('override_prompt');
-        
+
         if (!empty($override_prompt)) {
             return $override_prompt;
         }
@@ -163,5 +174,16 @@ class OpenAIConnector {
         - The translation must be accurate and preserve the original meaning.
         - Pay close attention to proper nouns like names, places, or organizations—they are often Slovak and may remain untranslated.
         ";
+    }
+
+  /**
+   * Returns the rephrase prompt.
+   *
+   * @return string
+   */
+    public function getRephrasePrompt(): string {
+      // TODO add more comprehensive prompt for rephrasing
+      return "Rephrase the following text in @source_lang without changing its meaning. The language is @source_lang.
+      Do not change |TRSLD_SPT| to anything else, it is a special tag that should remain unchanged.";
     }
 }

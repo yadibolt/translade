@@ -92,23 +92,24 @@
           // target the actions and create event listeners for them
           let actionBack = mainField.querySelectorAll("a.back")[0];
           let actionTranslate = mainField.querySelectorAll("a.translate")[0];
+          let actionRephrase = mainField.querySelectorAll("a.rephrase")[0];
           let actionLoader = mainField.querySelectorAll("a.load")[0];
 
           // -- back action
-          if (!actionBack || actionBack === undefined) return;
+          if (!actionBack) return;
           actionBack.addEventListener("click", (event) => {
             event.preventDefault();
             restoreFromHistory(fieldId);
           });
 
           // -- translate action
-          if (!actionTranslate || actionTranslate === undefined) return;
+          if (!actionTranslate) return;
           actionTranslate.addEventListener("click", (event) => {
             event.preventDefault();
 
             let historyRecord = getLastHistoryRecord(fieldId);
             setHistoryData(fieldId);
-            enableActionLoader(actionBack, actionTranslate, actionLoader);
+            enableActionLoader(actionBack, actionTranslate, actionRephrase, actionLoader);
 
             // return a promise, fetch the data
             return new Promise((resolve, reject) => {
@@ -116,13 +117,13 @@
               const languageFrom = document.getElementById(
                 "translade-languageFrom",
               );
-              if (!languageFrom || languageFrom === undefined)
+              if (!languageFrom)
                 reject("No Language Found.");
 
               const languageTo = document.getElementById(
                 "translade-languageTo",
               );
-              if (!languageTo || languageTo === undefined)
+              if (!languageTo)
                 reject("No Language Found.");
 
               if (String(languageFrom.value) === String(languageTo))
@@ -155,6 +156,7 @@
                     disableActionLoader(
                       actionBack,
                       actionTranslate,
+                      actionRephrase,
                       actionLoader,
                     );
                     reject("Returned data do not follow the structure.");
@@ -165,6 +167,7 @@
                   disableActionLoader(
                     actionBack,
                     actionTranslate,
+                    actionRephrase,
                     actionLoader,
                   );
                   resolve(data);
@@ -173,6 +176,77 @@
                   disableActionLoader(
                     actionBack,
                     actionTranslate,
+                    actionRephrase,
+                    actionLoader,
+                  );
+                  reject(e);
+                });
+            });
+          });
+
+          // -- rephrase action
+          if (!actionRephrase) return;
+          actionRephrase.addEventListener('click', (event) => {
+            event.preventDefault();
+
+            let historyRecord = getLastHistoryRecord(fieldId);
+            setHistoryData(fieldId);
+            enableActionLoader(actionBack, actionTranslate, actionRephrase, actionLoader);
+
+            // return a promise, fetch the data
+            return new Promise((resolve, reject) => {
+              // get the languages
+              const languageFrom = document.getElementById(
+                "translade-languageFrom",
+              );
+              if (!languageFrom) reject("No Language Found.");
+
+              // fetch the API
+              fetch("/api/translade/rephrase", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  form_id: String(config.form_id),
+                  text: String(historyRecord),
+                  trigger_id: String(fieldId),
+                  source_lang: String(languageFrom.value),
+                }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (
+                    !data.form_id ||
+                    !data.source_lang ||
+                    !data.status ||
+                    !data.rephrased_text ||
+                    !data.trigger_id
+                  ) {
+                    disableActionLoader(
+                      actionBack,
+                      actionTranslate,
+                      actionRephrase,
+                      actionLoader,
+                    );
+                    reject("Returned data do not follow the structure.");
+                  }
+
+                  // set the translated data for data.trigger_id
+                  setTranslatedData(data.trigger_id, data.rephrased_text);
+                  disableActionLoader(
+                    actionBack,
+                    actionTranslate,
+                    actionRephrase,
+                    actionLoader,
+                  );
+                  resolve(data);
+                })
+                .catch((e) => {
+                  disableActionLoader(
+                    actionBack,
+                    actionTranslate,
+                    actionRephrase,
                     actionLoader,
                   );
                   reject(e);
@@ -189,22 +263,28 @@
    *
    * @param {HTMLLinkElement} actionBack
    * @param {HTMLLinkElement} actionTranslate
+   * @param {HTMLLinkElement} actionRephrase
    * @param {HTMLLinkElement} actionLoad
    *
    * @returns {null}
    */
-  const enableActionLoader = (actionBack, actionTranslate, actionLoad) => {
-    if (!actionBack || actionBack === undefined) return;
+  const enableActionLoader = (actionBack, actionTranslate, actionRephrase, actionLoad) => {
+    if (!actionBack) return null;
     !actionBack.classList.contains("action-hide")
       ? actionBack.classList.add("action-hide")
       : null;
-    if (!actionTranslate || actionTranslate === undefined) return;
+    if (!actionTranslate) return null;
     !actionTranslate.classList.contains("action-hide")
       ? actionTranslate.classList.add("action-hide")
       : null;
 
+    if (!actionRephrase) return null;
+    !actionRephrase.classList.contains("action-hide")
+      ? actionRephrase.classList.add("action-hide")
+      : null;
+
     // show loader
-    if (!actionLoad || actionLoad === undefined) return;
+    if (!actionLoad) return null;
     actionLoad.classList.contains("action-hide")
       ? actionLoad.classList.remove("action-hide")
       : null;
@@ -217,22 +297,27 @@
    *
    * @param {HTMLLinkElement} actionBack
    * @param {HTMLLinkElement} actionTranslate
+   * @param {HTMLLinkElement} actionRephrase
    * @param {HTMLLinkElement} actionLoad
    *
    * @returns {null}
    */
-  const disableActionLoader = (actionBack, actionTranslate, actionLoad) => {
-    if (!actionBack || actionBack === undefined) return;
+  const disableActionLoader = (actionBack, actionTranslate, actionRephrase, actionLoad) => {
+    if (!actionBack) return null;
     actionBack.classList.contains("action-hide")
       ? actionBack.classList.remove("action-hide")
       : null;
-    if (!actionTranslate || actionTranslate === undefined) return;
+    if (!actionTranslate) return null;
     actionTranslate.classList.contains("action-hide")
       ? actionTranslate.classList.remove("action-hide")
       : null;
+    if (!actionRephrase) return null;
+    actionRephrase.classList.contains("action-hide")
+      ? actionRephrase.classList.remove("action-hide")
+      : null;
 
     // hide loader
-    if (!actionLoad || actionLoad === undefined) return;
+    if (!actionLoad) return null;
     !actionLoad.classList.contains("action-hide")
       ? actionLoad.classList.add("action-hide")
       : null;
@@ -255,7 +340,7 @@
       className.startsWith("translade-type-"),
     );
 
-    if (!fieldTypeFull || fieldTypeFull === undefined) return;
+    if (!fieldTypeFull) return null;
 
     const fieldType = String(fieldTypeFull).replaceAll("translade-type-", "");
 
@@ -280,18 +365,23 @@
     return null;
   };
 
+  /**
+   * Sets the history data for a fieldId.
+   *
+   * @param fieldId
+   */
   const setHistoryData = (fieldId) => {
     const history = window.transladeHistory.history;
     // get the item that has fieldId className, it contains the type of field
     const subfield = document.getElementsByClassName(fieldId)[0];
 
-    if (!subfield || subfield === undefined) return;
+    if (!subfield) return;
 
     const fieldTypeFull = Array.from(subfield.classList).find((className) =>
       className.startsWith("translade-type-"),
     );
 
-    if (!fieldTypeFull || fieldTypeFull === undefined) return;
+    if (!fieldTypeFull) return;
 
     const fieldType = String(fieldTypeFull).replaceAll("translade-type-", "");
     let input = "";
@@ -324,10 +414,14 @@
       history[fieldId.toString()].push(input);
     }
     window.transladeHistory.history = history;
-
-    console.log(window.transladeHistory);
   }
 
+  /**
+   * Gets the last history record for a fieldId.
+   *
+   * @param fieldId
+   * @returns {*|null}
+   */
   const getLastHistoryRecord = (fieldId) => {
     const history = window.transladeHistory.history;
 
@@ -340,6 +434,12 @@
     return lastItem;
   }
 
+  /**
+   * Restores the last item from history for a fieldId and sets it to the field.
+   *
+   * @param fieldId
+   * @returns {null}
+   */
   const restoreFromHistory = (fieldId) => {
     const history = window.transladeHistory.history;
 
@@ -353,8 +453,6 @@
     }
 
     window.transladeHistory.history = history;
-
-    console.log(window.transladeHistory.history);
 
     // reuse fn to restore the data
     setTranslatedData(fieldId, lastItem);
@@ -620,18 +718,30 @@
     translateIcon.src = "/modules/translade/icons/translate.svg";
     translateIcon.alt = "Translate";
 
+    const rephraseIcon = document.createElement("img");
+    rephraseIcon.src = "/modules/translade/icons/rephrase.svg";
+    rephraseIcon.alt = "Rephrase";
+
     const loaderIcon = document.createElement("span");
     loaderIcon.classList.add("loader");
 
     const aBack = document.createElement("a");
     aBack.classList.add(...["translade-action-trigger", "back"]);
+    aBack.title = 'Back to previous text';
     aBack.dataset.targetField = uid;
     aBack.appendChild(backIcon);
 
     const aTranslate = document.createElement("a");
     aTranslate.classList.add(...["translade-action-trigger", "translate"]);
     aTranslate.dataset.targetField = uid;
+    aTranslate.title = 'Translate text';
     aTranslate.appendChild(translateIcon);
+
+    const aRephrase = document.createElement("a");
+    aRephrase.classList.add(...["translade-action-trigger", "rephrase"]);
+    aTranslate.dataset.targetField = uid;
+    aRephrase.title = 'Rephrase text';
+    aRephrase.appendChild(rephraseIcon);
 
     const aLoader = document.createElement("a");
     aLoader.classList.add(
@@ -642,6 +752,7 @@
 
     actionsWrapper.appendChild(aBack);
     actionsWrapper.appendChild(aTranslate);
+    actionsWrapper.appendChild(aRephrase);
     actionsWrapper.appendChild(aLoader);
 
     return actionsWrapper;

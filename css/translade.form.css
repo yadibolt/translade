@@ -67,10 +67,19 @@
 
 .translade-actions-wrapper a:nth-child(2) {
   border-left: 1px solid black;
+  border-right: 1px solid black;
 }
 
 .translade-actions-wrapper a:nth-child(2) img {
   width: 24px;
+}
+
+.translade-actions-wrapper a:nth-child(3) {
+  border-left: 1px solid black;
+}
+
+.translade-actions-wrapper a:nth-child(3) img {
+  width: 28px;
 }
 
 .translade-shadow-data {
