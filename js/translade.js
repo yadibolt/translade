@@ -103,7 +103,6 @@
           if (!actionBack) return;
           actionBack.addEventListener("click", (event) => {
             event.preventDefault();
-            console.log("Registered click");
             restoreFromHistory(fieldId);
           });
 
@@ -159,7 +158,6 @@
                   setFieldData(data.trigger_id, data.translated_text);
 
                   setHistoryData(fieldId);
-                  console.log(window.transladeHistory.history);
 
                   disableActionLoader(
                     actionBack,
@@ -188,8 +186,6 @@
 
             let historyRecord = getLastHistoryRecord(fieldId);
             enableActionLoader(actionBack, actionTranslate, actionRephrase, actionLoader);
-
-            console.log(historyRecord);
 
             // return a promise, fetch the data
             return new Promise((resolve, reject) => {
@@ -226,9 +222,7 @@
 
                   // set the translated data for data.trigger_id
                   setFieldData(data.trigger_id, data.rephrased_text);
-
                   setHistoryData(fieldId);
-                  console.log(window.transladeHistory.history);
 
                   disableActionLoader(
                     actionBack,
