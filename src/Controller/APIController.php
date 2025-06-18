@@ -3,10 +3,11 @@
 namespace Drupal\translade\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\translade\OpenAIConnector;
+use Drupal\translade\Connector\OpenAIConnector;
+use Drupal\translade\Manager\LanguageManager;
+use Drupal\translade\Manager\PromptManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-
 class APIController extends ControllerBase {
 
   /**
@@ -20,12 +21,13 @@ class APIController extends ControllerBase {
    *   A JSON response containing the translated text or an error message.
    */
   public function translate(Request $request) {
+    $OpenAI_connector = new OpenAIConnector();
+    $prompt_manager = new PromptManager();
+
     // get the JSON content from the request
     $content = json_decode($request->getContent(), TRUE);
 
-    if (!$content) {
-      return new JsonResponse(['error' => 'Invalid JSON data.'], 400);
-    }
+    if (!$content) return new JsonResponse(['error' => 'Invalid JSON data.'], 400);
 
     $form_id = $content['form_id'] ?? '';
     $text = $content['text'] ?? '';
@@ -38,18 +40,16 @@ class APIController extends ControllerBase {
       return new JsonResponse(['error' => 'Missing required parameters'], 400);
     }
 
-    $connector = new OpenAIConnector();
-    $prompt = $connector->formatTranslationPrompt(
-      $connector->getTranslationPrompt(),
-      $source_lang,
-      $target_lang
-    );
+    $prompt = $prompt_manager->getTranslationPrompt([
+      '@source_lang' => $source_lang,
+      '@target_lang' => $target_lang,
+    ]);
 
-    $response = $connector->executeRequest(
-      $connector->makeConnection(),
+    $response = $OpenAI_connector->executeRequest(
+      $OpenAI_connector->makeConnection(),
       'POST',
       [
-        'model' => $connector->getModel(),
+        'model' => $OpenAI_connector->getModel(),
         'temperature' => 0,
         'messages' => [ // create 'conversation' array
           [
@@ -65,9 +65,7 @@ class APIController extends ControllerBase {
       'chat/completions' // endpoint
     );
 
-    if (!$response) {
-      return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
-    }
+    if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
     if (isset($response['choices'][0]['message']['content'])) {
       $translated_text = trim($response['choices'][0]['message']['content']);
@@ -87,13 +85,20 @@ class APIController extends ControllerBase {
     ], 200);
   }
 
-  public function rephrase(Request $request) {
-// get the JSON content from the request
+  /**
+   * Rephrases text using OpenAI API.
+   *
+   * @param Request $request
+   * @return JsonResponse
+   */
+  public function rephrase(Request $request): JsonResponse {
+    $OpenAI_connector = new OpenAIConnector();
+    $prompt_manager = new PromptManager();
+
+    // get the JSON content from the request
     $content = json_decode($request->getContent(), TRUE);
 
-    if (!$content) {
-      return new JsonResponse(['error' => 'Invalid JSON data.'], 400);
-    }
+    if (!$content) return new JsonResponse(['error' => 'Invalid JSON data.'], 400);
 
     $form_id = $content['form_id'] ?? '';
     $text = $content['text'] ?? '';
@@ -105,17 +110,15 @@ class APIController extends ControllerBase {
       return new JsonResponse(['error' => 'Missing required parameters'], 400);
     }
 
-    $connector = new OpenAIConnector();
-    $prompt = $connector->formatRephrasePrompt(
-      $connector->getRephrasePrompt(),
-      $source_lang,
-    );
+    $prompt = $prompt_manager->getRephrasePrompt([
+      '@source_lang' => $source_lang,
+    ]);
 
-    $response = $connector->executeRequest(
-      $connector->makeConnection(),
+    $response = $OpenAI_connector->executeRequest(
+      $OpenAI_connector->makeConnection(),
       'POST',
       [
-        'model' => $connector->getModel(),
+        'model' => $OpenAI_connector->getModel(),
         'temperature' => 0,
         'messages' => [ // create 'conversation' array
           [
@@ -131,9 +134,7 @@ class APIController extends ControllerBase {
       'chat/completions' // endpoint
     );
 
-    if (!$response) {
-      return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
-    }
+    if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
     if (isset($response['choices'][0]['message']['content'])) {
       $rephrased_text = trim($response['choices'][0]['message']['content']);
@@ -149,7 +150,6 @@ class APIController extends ControllerBase {
       'source_lang' => $source_lang,
       'trigger_id' => $trigger_id,
       'timestamp' => time(),
-      'prompt' => $prompt,
     ], 200);
   }
 

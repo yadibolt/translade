@@ -2,10 +2,9 @@
 
 namespace Drupal\translade\Form;
 
-use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\translade\OpenAIConnector;
+use Drupal\translade\Connector\OpenAIConnector;
 use Drupal\commerce_product\Entity\ProductVariationType;
 
 class SettingsForm extends ConfigFormBase {
@@ -84,6 +83,8 @@ class SettingsForm extends ConfigFormBase {
       '#type' => 'fieldset',
       '#title' => $this->t('Translation Options'),
       '#weight' => $weight++,
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
     ];
 
     $form['options']['content_types'] = [
@@ -94,11 +95,27 @@ class SettingsForm extends ConfigFormBase {
       '#weight' => $weight++,
     ];
 
-    $form['options']['override_prompt'] = [
+    $form['prompt_options'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Prompt options'),
+      '#weight' => $weight++,
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    ];
+
+    $form['prompt_options']['override_translation'] = [
       '#type' => 'textarea',
-      '#title' => $this->t('Override Translation Prompt'),
-      '#description' => $this->t('You can override the default translation prompt used by OpenAI if you want to. Leaving this field empty will use the default prompt, which is recommended.'),
-      '#default_value' => $config->get('override_prompt') ?: '',
+      '#title' => $this->t('Translation Prompt'),
+      '#description' => $this->t('You can override the default translation prompt used, if you want to. Leaving this field empty will use the default prompt, which is recommended.'),
+      '#default_value' => $config->get('override_translation') ?: '',
+      '#weight' => $weight++,
+    ];
+
+    $form['prompt_options']['override_rephrase'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Rephrase Prompt'),
+      '#description' => $this->t('You can override the default rephrase prompt used, if you want to. Leaving this field empty will use the default prompt, which is recommended.'),
+      '#default_value' => $config->get('override_rephrase') ?: '',
       '#weight' => $weight++,
     ];
 
@@ -107,6 +124,8 @@ class SettingsForm extends ConfigFormBase {
       '#title' => $this->t('Translation Languages'),
       '#description' => $this->t('Define the languages you want to translate to and from.'),
       '#weight' => $weight++,
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
     ];
 
     $form['languages']['languages_area'] = [
@@ -131,9 +150,14 @@ class SettingsForm extends ConfigFormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     // prompt
-    $prompt = $form_state->getValue('override_prompt');
-    if (!empty($prompt) && strlen($prompt) < 10) {
-      $form_state->setErrorByName('override_prompt', $this->t('The override prompt must be at least 10 characters long.'));
+    $override_translation = $form_state->getValue('override_translation');
+    if (!empty($override_translation) && strlen($override_translation) < 10) {
+      $form_state->setErrorByName('override_translation', $this->t('The override prompt must be at least 10 characters long.'));
+    }
+    // prompt
+    $override_rephrase = $form_state->getValue('override_rephrase');
+    if (!empty($override_rephrase) && strlen($override_rephrase) < 10) {
+      $form_state->setErrorByName('override_rephrase', $this->t('The override prompt must be at least 10 characters long.'));
     }
 
     // language
@@ -192,14 +216,22 @@ class SettingsForm extends ConfigFormBase {
       }
     }
 
-    // override prompt
-    // TODO optimize usecases for this
-    $override_prompt = $form_state->getValue('override_prompt');
-    if ($override_prompt !== $this->config('translade.settings')->get('override_prompt')) {
+    // override_translation
+    $override_translation = $form_state->getValue('override_translation');
+    if ($override_translation !== $this->config('translade.settings')->get('override_translation')) {
       $this->config('translade.settings')
-        ->set('override_prompt', $override_prompt)
+        ->set('override_translation', $override_translation)
         ->save();
-      \Drupal::messenger()->addStatus($this->t('Override translation prompt has been updated.'));
+      \Drupal::messenger()->addStatus($this->t('Translation prompt has been updated.'));
+    }
+
+    // override_rephrase
+    $override_rephrase = $form_state->getValue('override_rephrase');
+    if ($override_rephrase !== $this->config('translade.settings')->get('override_rephrase')) {
+      $this->config('translade.settings')
+        ->set('override_rephrase', $override_rephrase)
+        ->save();
+      \Drupal::messenger()->addStatus($this->t('Rephrase prompt has been updated.'));
     }
 
     // languages

@@ -1,6 +1,12 @@
 (function ($, Drupal, once) {
   "use strict";
 
+  const moduleDefaults = {
+    sessionName: 'translade-settings',
+    assetsFolder: '/modules/translade/',
+    selectedLangIdDefault: 'default',
+  }
+
   Drupal.behaviors.translade = {
     attach: function (context, settings) {
       // use once to run this script only once
@@ -25,12 +31,15 @@
         // create config struct
         const config = {
           languages: String(configParse.languages).trim().split(","),
-          content_language: String(configParse.content_language).trim(),
-          form_id: String(configParse.form_id),
+          contentLanguage: String(configParse.content_language).trim(),
+          formId: String(configParse.form_id),
         };
 
         // remove the config textarea, we do not need it anymore
         configHTML.remove();
+
+        // create session or grab existing one
+        initializeSession();
 
         // config OK. create a select for languages in the shadow root
         const shadowRoot = document.getElementById(
@@ -88,11 +97,13 @@
           let actionTranslate = mainField.querySelectorAll("a.translate")[0];
           let actionRephrase = mainField.querySelectorAll("a.rephrase")[0];
           let actionLoader = mainField.querySelectorAll("a.load")[0];
+          let selectLang = document.getElementById('translade-languageTo');
 
           // -- back action
           if (!actionBack) return;
           actionBack.addEventListener("click", (event) => {
             event.preventDefault();
+            console.log("Registered click");
             restoreFromHistory(fieldId);
           });
 
@@ -102,18 +113,13 @@
             event.preventDefault();
 
             let historyRecord = getLastHistoryRecord(fieldId);
-            setHistoryData(fieldId);
             enableActionLoader(actionBack, actionTranslate, actionRephrase, actionLoader);
+
+            const session = getSession();
 
             // return a promise, fetch the data
             return new Promise((resolve, reject) => {
-              const languageTo = document.getElementById(
-                "translade-languageTo",
-              );
-              if (!languageTo)
-                reject("No Language Found.");
-
-              if (config.content_language === String(languageTo))
+              if (config.contentLanguage === String(session.selectedLangId))
                 reject("Languages are the same.");
 
               // fetch the API
@@ -123,10 +129,10 @@
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  form_id: String(config.form_id),
+                  form_id: String(config.formId),
                   text: String(historyRecord),
                   trigger_id: String(fieldId),
-                  source_lang: String(config.content_language),
+                  source_lang: String(config.contentLanguage),
                   target_lang: String(languageTo.value),
                 }),
               })
@@ -150,7 +156,11 @@
                   }
 
                   // set the translated data for data.trigger_id
-                  setTranslatedData(data.trigger_id, data.translated_text);
+                  setFieldData(data.trigger_id, data.translated_text);
+
+                  setHistoryData(fieldId);
+                  console.log(window.transladeHistory.history);
+
                   disableActionLoader(
                     actionBack,
                     actionTranslate,
@@ -177,8 +187,9 @@
             event.preventDefault();
 
             let historyRecord = getLastHistoryRecord(fieldId);
-            setHistoryData(fieldId);
             enableActionLoader(actionBack, actionTranslate, actionRephrase, actionLoader);
+
+            console.log(historyRecord);
 
             // return a promise, fetch the data
             return new Promise((resolve, reject) => {
@@ -189,10 +200,10 @@
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  form_id: String(config.form_id),
+                  form_id: String(config.formId),
                   text: String(historyRecord),
                   trigger_id: String(fieldId),
-                  source_lang: String(config.content_language),
+                  source_lang: String(config.contentLanguage),
                 }),
               })
                 .then((response) => response.json())
@@ -214,7 +225,11 @@
                   }
 
                   // set the translated data for data.trigger_id
-                  setTranslatedData(data.trigger_id, data.rephrased_text);
+                  setFieldData(data.trigger_id, data.rephrased_text);
+
+                  setHistoryData(fieldId);
+                  console.log(window.transladeHistory.history);
+
                   disableActionLoader(
                     actionBack,
                     actionTranslate,
@@ -234,6 +249,20 @@
                 });
             });
           });
+
+          // -- lang select change event
+          if (!selectLang) return;
+          if (getSession().selectedLangId.toString() === moduleDefaults.selectedLangIdDefault.toString()) {
+            // sef default if the value is not set
+            setSelectedLangId(selectLang.value,toString());
+          }
+          // attach event listener
+          selectLang.addEventListener("change", (event) => {
+            event.preventDefault();
+
+            setSelectedLangId(event.target.value);
+          });
+
         });
       });
     },
@@ -307,14 +336,14 @@
   };
 
   /**
-   * Sets translated data from API to fieldId HTMLElement.
+   * Sets field data from API to fieldId HTMLElement.
    *
    * @param {string} fieldId - fieldId of a field to change its value
    * @param {string} newValue - translated text
    *
    * @returns {null}
    */
-  const setTranslatedData = (fieldId, newValue) => {
+  const setFieldData = (fieldId, newValue) => {
     const subfield = document.getElementsByClassName(fieldId)[0];
 
     const fieldTypeFull = Array.from(subfield.classList).find((className) =>
@@ -406,7 +435,7 @@
   const getLastHistoryRecord = (fieldId) => {
     const history = window.transladeHistory.history;
 
-    if (!history || history === undefined) return null;
+    if (!history) return null;
     if (!history[fieldId] || history[fieldId] === undefined) return null;
 
     // get the last item in the array
@@ -422,21 +451,21 @@
    * @returns {null}
    */
   const restoreFromHistory = (fieldId) => {
-    const history = window.transladeHistory.history;
+    const hist = window.transladeHistory.history;
 
-    if (!history || history === undefined) return null;
-    if (!history[fieldId] || history[fieldId] === undefined) return null;
+    if (!hist) return null;
+    if (!hist[fieldId] || hist[fieldId] === undefined) return null;
 
     // get the last item in the array and remove it
-    const lastItem = history[fieldId][history[fieldId].length - 1];
-    if (history[fieldId].length > 1) {
-      history[fieldId].pop();
+    if (hist[fieldId].length > 1) {
+      hist[fieldId].pop();
     }
 
-    window.transladeHistory.history = history;
+    const lastItem = hist[fieldId][hist[fieldId].length - 1];
+    window.transladeHistory.history = hist;
 
     // reuse fn to restore the data
-    setTranslatedData(fieldId, lastItem);
+    setFieldData(fieldId, lastItem);
 
     return null;
   }
@@ -662,7 +691,7 @@
 
     config.languages.forEach((language, _) => {
       let values = language.split("|");
-      select.innerHTML += getOptionTag(values[0], values[1], config.content_language);
+      select.innerHTML += getOptionTag(values[0], values[1], config.contentLanguage);
     });
 
     return select;
@@ -673,13 +702,17 @@
    *
    * @param {Object} value - Configuration object
    * @param {string} name - Name of an option
-   * @param {string} current_language - Current language of the content
+   * @param {string} currentLanguage - Current language of the content
    *
    * @returns {string} - NOTE: as string
    */
-  const getOptionTag = (value, name, current_language) => {
-    if (current_language.toString() === value.toString()) return "";
-    return `<option value="${value}">${name}</option>`;
+  const getOptionTag = (value, name, currentLanguage) => {
+    // if (currentLanguage.toString() === value.toString()) return ""; Possibly not useful in Drupal context
+    if (value.toString() === getSession().selectedLangId.toString()) {
+      return `<option value="${value}" name="${name}" selected>${name}</option>`;
+    } else {
+      return `<option value="${value}" name="${name}">${name}</option>`;
+    }
   };
 
   /**
@@ -694,15 +727,15 @@
     actionsWrapper.classList.add("translade-actions-wrapper");
 
     const backIcon = document.createElement("img");
-    backIcon.src = "/modules/translade/icons/back.svg";
+    backIcon.src = `${moduleDefaults.assetsFolder}/icons/back.svg`;
     backIcon.alt = "Back";
 
     const translateIcon = document.createElement("img");
-    translateIcon.src = "/modules/translade/icons/translate.svg";
+    translateIcon.src = `${moduleDefaults.assetsFolder}/icons/translate.svg`;
     translateIcon.alt = "Translate";
 
     const rephraseIcon = document.createElement("img");
-    rephraseIcon.src = "/modules/translade/icons/rephrase.svg";
+    rephraseIcon.src = `${moduleDefaults.assetsFolder}/icons/rephrase.svg`;
     rephraseIcon.alt = "Rephrase";
 
     const loaderIcon = document.createElement("span");
@@ -740,4 +773,49 @@
 
     return actionsWrapper;
   };
+
+  const initializeSession = () => {
+    const currentSession = window.sessionStorage.getItem(moduleDefaults.sessionName);
+    if (!currentSession) {
+      window.sessionStorage.setItem(moduleDefaults.sessionName, JSON.stringify(getSessionSettingsDefault()));
+      return window.sessionStorage.getItem(moduleDefaults.sessionName);
+    }
+
+    return currentSession;
+  }
+
+  const getSessionSettingsDefault = () => {
+    return {
+      'selectedLangId': moduleDefaults.selectedLangIdDefault,
+    }
+  }
+
+  const getSession = () => {
+    const currentSession = window.sessionStorage.getItem(moduleDefaults.sessionName);
+    if (!currentSession) return initializeSession();
+
+    try {
+      return JSON.parse(currentSession);
+    } catch (e) {
+      throw new Error("Session data is not valid JSON.");
+    }
+  }
+
+  const setSession = (dataObject) => {
+    if (!getSession()) throw new Error("Session is not initialized.");
+
+    try {
+      let data = JSON.stringify(dataObject);
+      window.sessionStorage.setItem(moduleDefaults.sessionName, data);
+    } catch (e) {
+      throw new Error("Data object is not valid JSON.");
+    }
+  }
+
+  const setSelectedLangId = (langId) => {
+    let data = getSession();
+    data.selectedLangId = langId;
+
+    setSession(data);
+  }
 })(jQuery, Drupal, once);
