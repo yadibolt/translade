@@ -24,6 +24,11 @@ function translade_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
                 '#weight' => -100,
             ];
 
+            $current_language_id = \Drupal::languageManager()->getCurrentLanguage()->getId();
+            if (!$current_language_id) {
+              $current_language_id = \Drupal::languageManager()->getDefaultLanguage()->getId();
+            }
+
             // add shadow DOM element for config
             $form['translade_shadow_root_config'] = [
                 '#type' => 'textarea',
@@ -32,6 +37,7 @@ function translade_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
                 ],
                 '#value' => json_encode([
                     'languages' => $config->get('languages') ?: [],
+                    'content_language' => $current_language_id,
                     'form_id' => $form_id,
                 ]),
                 '#weight' => $weight++,

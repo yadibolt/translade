@@ -16,16 +16,16 @@
         );
         if (
           !configHTML ||
-          configHTML === undefined ||
           String(configHTML.value).length <= 0
         )
           return;
         const configParse = JSON.parse(String(configHTML.value).trim());
-        if (!configParse || configParse === undefined) return;
+        if (!configParse) return;
 
         // create config struct
         const config = {
           languages: String(configParse.languages).trim().split(","),
+          content_language: String(configParse.content_language).trim(),
           form_id: String(configParse.form_id),
         };
 
@@ -36,7 +36,7 @@
         const shadowRoot = document.getElementById(
           "translade-mount-shadow-root",
         );
-        if (!shadowRoot || shadowRoot === undefined) return;
+        if (!shadowRoot) return;
 
         // create the top box with lang selects
         const wrapper = document.createElement("div");
@@ -44,12 +44,7 @@
         const title = document.createElement("h3");
         title.innerHTML = "Translade";
         const description = document.createElement("p");
-        description.innerHTML = "Select languages for Translade service.";
-        const languageFrom = createLanguageOptionsSelect(
-          config,
-          "translade-languageFrom",
-          "translade-languageFrom",
-        );
+        description.innerHTML = "Select a language to translate to.";
         const languageTo = createLanguageOptionsSelect(
           config,
           "translade-languageTo",
@@ -57,7 +52,6 @@
         );
 
         wrapper.appendChild(title);
-        wrapper.appendChild(languageFrom);
         wrapper.appendChild(languageTo);
         wrapper.appendChild(description);
 
@@ -68,7 +62,7 @@
         let fields = document.querySelectorAll(
           'div[id*="translade-shadow-root-"]',
         );
-        if (!fields || fields === undefined) return;
+        if (!fields) return;
 
         fields.forEach((field, _) => {
           // we want to target the input field, not the 'shadow root' wrapper around it
@@ -113,20 +107,13 @@
 
             // return a promise, fetch the data
             return new Promise((resolve, reject) => {
-              // get the languages
-              const languageFrom = document.getElementById(
-                "translade-languageFrom",
-              );
-              if (!languageFrom)
-                reject("No Language Found.");
-
               const languageTo = document.getElementById(
                 "translade-languageTo",
               );
               if (!languageTo)
                 reject("No Language Found.");
 
-              if (String(languageFrom.value) === String(languageTo))
+              if (config.content_language === String(languageTo))
                 reject("Languages are the same.");
 
               // fetch the API
@@ -139,7 +126,7 @@
                   form_id: String(config.form_id),
                   text: String(historyRecord),
                   trigger_id: String(fieldId),
-                  source_lang: String(languageFrom.value),
+                  source_lang: String(config.content_language),
                   target_lang: String(languageTo.value),
                 }),
               })
@@ -195,12 +182,6 @@
 
             // return a promise, fetch the data
             return new Promise((resolve, reject) => {
-              // get the languages
-              const languageFrom = document.getElementById(
-                "translade-languageFrom",
-              );
-              if (!languageFrom) reject("No Language Found.");
-
               // fetch the API
               fetch("/api/translade/rephrase", {
                 method: "POST",
@@ -211,7 +192,7 @@
                   form_id: String(config.form_id),
                   text: String(historyRecord),
                   trigger_id: String(fieldId),
-                  source_lang: String(languageFrom.value),
+                  source_lang: String(config.content_language),
                 }),
               })
                 .then((response) => response.json())
@@ -681,7 +662,7 @@
 
     config.languages.forEach((language, _) => {
       let values = language.split("|");
-      select.innerHTML += getOptionTag(values[0], values[1]);
+      select.innerHTML += getOptionTag(values[0], values[1], config.content_language);
     });
 
     return select;
@@ -692,10 +673,12 @@
    *
    * @param {Object} value - Configuration object
    * @param {string} name - Name of an option
+   * @param {string} current_language - Current language of the content
    *
-   * @returns {HTMLOptionElement} - NOTE: as string
+   * @returns {string} - NOTE: as string
    */
-  const getOptionTag = (value, name) => {
+  const getOptionTag = (value, name, current_language) => {
+    if (current_language.toString() === value.toString()) return "";
     return `<option value="${value}">${name}</option>`;
   };
 
