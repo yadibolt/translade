@@ -1,4 +1,4 @@
-(function ($, Drupal, once) {
+(function (Drupal, once) {
   "use strict";
 
   const moduleDefaults = {
@@ -28,26 +28,20 @@
         const configParse = JSON.parse(String(configHTML.value).trim());
         if (!configParse) return;
 
-        // create config struct
         const config = {
           languages: String(configParse.languages).trim().split(","),
           contentLanguage: String(configParse.content_language).trim(),
           formId: String(configParse.form_id),
         };
 
-        // remove the config textarea, we do not need it anymore
         configHTML.remove();
-
-        // create session or grab existing one
         initializeSession();
 
-        // config OK. create a select for languages in the shadow root
         const shadowRoot = document.getElementById(
           "translade-mount-shadow-root",
         );
         if (!shadowRoot) return;
 
-        // create the top box with lang selects
         const wrapper = document.createElement("div");
         wrapper.classList.add("translade-wrapper");
         const title = document.createElement("h3");
@@ -63,11 +57,8 @@
         wrapper.appendChild(title);
         wrapper.appendChild(languageTo);
         wrapper.appendChild(description);
-
-        // attach the wrapper to the shadow root
         shadowRoot.appendChild(wrapper);
 
-        // get all the fields
         let fields = document.querySelectorAll(
           'div[id*="translade-shadow-root-"]',
         );
@@ -79,8 +70,8 @@
             "translade-shadow-root-",
             "translade-field-",
           );
-          const transladeActions = getTransladeActions(fieldId); // get actions e.g. back, translate, loading state
-          field.appendChild(transladeActions); // add them to the DOM
+          const transladeActions = getTransladeActions(fieldId);
+          field.appendChild(transladeActions);
           setHistoryData(fieldId);
         });
 
@@ -92,7 +83,6 @@
             "translade-field-",
           );
 
-          // target the actions and create event listeners for them
           let actionBack = mainField.querySelectorAll("a.back")[0];
           let actionTranslate = mainField.querySelectorAll("a.translate")[0];
           let actionRephrase = mainField.querySelectorAll("a.rephrase")[0];
@@ -116,12 +106,10 @@
 
             const session = getSession();
 
-            // return a promise, fetch the data
             return new Promise((resolve, reject) => {
               if (config.contentLanguage === String(session.selectedLangId))
                 reject("Languages are the same.");
 
-              // fetch the API
               fetch("/api/translade/translate", {
                 method: "POST",
                 headers: {
@@ -154,9 +142,7 @@
                     reject("Returned data do not follow the structure.");
                   }
 
-                  // set the translated data for data.trigger_id
                   setFieldData(data.trigger_id, data.translated_text);
-
                   setHistoryData(fieldId);
 
                   disableActionLoader(
@@ -187,9 +173,7 @@
             let historyRecord = getLastHistoryRecord(fieldId);
             enableActionLoader(actionBack, actionTranslate, actionRephrase, actionLoader);
 
-            // return a promise, fetch the data
             return new Promise((resolve, reject) => {
-              // fetch the API
               fetch("/api/translade/rephrase", {
                 method: "POST",
                 headers: {
@@ -220,7 +204,6 @@
                     reject("Returned data do not follow the structure.");
                   }
 
-                  // set the translated data for data.trigger_id
                   setFieldData(data.trigger_id, data.rephrased_text);
                   setHistoryData(fieldId);
 
@@ -244,13 +227,12 @@
             });
           });
 
-          // -- lang select change event
+          // -- lang select
           if (!selectLang) return;
           if (getSession().selectedLangId.toString() === moduleDefaults.selectedLangIdDefault.toString()) {
             // sef default if the value is not set
             setSelectedLangId(selectLang.value,toString());
           }
-          // attach event listener
           selectLang.addEventListener("change", (event) => {
             event.preventDefault();
 
@@ -263,79 +245,66 @@
   };
 
   /**
-   * Enables the visual loader.
-   *
    * @param {HTMLLinkElement} actionBack
    * @param {HTMLLinkElement} actionTranslate
    * @param {HTMLLinkElement} actionRephrase
    * @param {HTMLLinkElement} actionLoad
-   *
-   * @returns {null}
+   * @returns {void}
    */
   const enableActionLoader = (actionBack, actionTranslate, actionRephrase, actionLoad) => {
-    if (!actionBack) return null;
+    if (!actionBack) return;
     !actionBack.classList.contains("action-hide")
       ? actionBack.classList.add("action-hide")
       : null;
-    if (!actionTranslate) return null;
+    if (!actionTranslate) return;
     !actionTranslate.classList.contains("action-hide")
       ? actionTranslate.classList.add("action-hide")
       : null;
 
-    if (!actionRephrase) return null;
+    if (!actionRephrase) return;
     !actionRephrase.classList.contains("action-hide")
       ? actionRephrase.classList.add("action-hide")
       : null;
 
     // show loader
-    if (!actionLoad) return null;
+    if (!actionLoad) return;
     actionLoad.classList.contains("action-hide")
       ? actionLoad.classList.remove("action-hide")
       : null;
-
-    return null;
   };
 
   /**
-   * Disables the visual loader.
-   *
    * @param {HTMLLinkElement} actionBack
    * @param {HTMLLinkElement} actionTranslate
    * @param {HTMLLinkElement} actionRephrase
    * @param {HTMLLinkElement} actionLoad
-   *
-   * @returns {null}
+   * @returns {void}
    */
   const disableActionLoader = (actionBack, actionTranslate, actionRephrase, actionLoad) => {
-    if (!actionBack) return null;
+    if (!actionBack) return;
     actionBack.classList.contains("action-hide")
       ? actionBack.classList.remove("action-hide")
       : null;
-    if (!actionTranslate) return null;
+    if (!actionTranslate) return;
     actionTranslate.classList.contains("action-hide")
       ? actionTranslate.classList.remove("action-hide")
       : null;
-    if (!actionRephrase) return null;
+    if (!actionRephrase) return;
     actionRephrase.classList.contains("action-hide")
       ? actionRephrase.classList.remove("action-hide")
       : null;
 
     // hide loader
-    if (!actionLoad) return null;
+    if (!actionLoad) return;
     !actionLoad.classList.contains("action-hide")
       ? actionLoad.classList.add("action-hide")
       : null;
-
-    return null;
   };
 
   /**
-   * Sets field data from API to fieldId HTMLElement.
-   *
-   * @param {string} fieldId - fieldId of a field to change its value
-   * @param {string} newValue - translated text
-   *
-   * @returns {null}
+   * @param {string} fieldId
+   * @param {string} newValue
+   * @returns {void}
    */
   const setFieldData = (fieldId, newValue) => {
     const subfield = document.getElementsByClassName(fieldId)[0];
@@ -344,7 +313,7 @@
       className.startsWith("translade-type-"),
     );
 
-    if (!fieldTypeFull) return null;
+    if (!fieldTypeFull) return;
 
     const fieldType = String(fieldTypeFull).replaceAll("translade-type-", "");
 
@@ -365,14 +334,11 @@
         setTextWithSummaryValue(subfield, newValue);
         break;
     }
-
-    return null;
   };
 
   /**
-   * Sets the history data for a fieldId.
-   *
    * @param fieldId
+   * @returns {void}
    */
   const setHistoryData = (fieldId) => {
     const history = window.transladeHistory.history;
@@ -407,12 +373,10 @@
         break;
     }
 
-    // create an object with key as fieldId and value as input
     if (!history[fieldId] || history[fieldId] === undefined) {
       history[fieldId.toString()] = [input];
     } else {
       if (history[fieldId.toString()].length >= window.transladeHistory.maximumHistoryLength) {
-        // remove first element if the limit is reached
         history[fieldId.toString()].shift();
       }
       history[fieldId.toString()].push(input);
@@ -421,10 +385,8 @@
   }
 
   /**
-   * Gets the last history record for a fieldId.
-   *
    * @param fieldId
-   * @returns {*|null}
+   * @returns {string|null}
    */
   const getLastHistoryRecord = (fieldId) => {
     const history = window.transladeHistory.history;
@@ -432,43 +394,29 @@
     if (!history) return null;
     if (!history[fieldId] || history[fieldId] === undefined) return null;
 
-    // get the last item in the array
-    const lastItem = history[fieldId][history[fieldId].length - 1];
-
-    return lastItem;
+    return history[fieldId][history[fieldId].length - 1];
   }
 
   /**
-   * Restores the last item from history for a fieldId and sets it to the field.
-   *
    * @param fieldId
-   * @returns {null}
+   * @returns {void}
    */
   const restoreFromHistory = (fieldId) => {
     const hist = window.transladeHistory.history;
 
-    if (!hist) return null;
-    if (!hist[fieldId] || hist[fieldId] === undefined) return null;
+    if (!hist) return;
+    if (!hist[fieldId] || hist[fieldId] === undefined) return;
 
-    // get the last item in the array and remove it
     if (hist[fieldId].length > 1) {
       hist[fieldId].pop();
     }
 
-    const lastItem = hist[fieldId][hist[fieldId].length - 1];
     window.transladeHistory.history = hist;
-
-    // reuse fn to restore the data
-    setFieldData(fieldId, lastItem);
-
-    return null;
+    setFieldData(fieldId, hist[fieldId][hist[fieldId].length - 1]);
   }
 
   /**
-   * Gets the value from String type value.
-   *
    * @param {HTMLElement} subfield
-   *
    * @returns {string}
    */
   const getStringTypeValue = (subfield) => {
@@ -477,11 +425,8 @@
   };
 
   /**
-   * Sets the value to String type value.
-   *
    * @param {HTMLElement} subfield
    * @param {string} newValue
-   *
    * @returns {string}
    */
   const setStringTypeValue = (subfield, newValue) => {
@@ -490,10 +435,7 @@
   };
 
   /**
-   * Gets the value from StringLong type value.
-   *
    * @param {HTMLElement} subfield
-   *
    * @returns {string}
    */
   const getStringLongTypeValue = (subfield) => {
@@ -502,11 +444,8 @@
   };
 
   /**
-   * Sets the value to StringLong type value.
-   *
    * @param {HTMLElement} subfield
    * @param {string} newValue
-   *
    * @returns {string}
    */
   const setStringLongTypeValue = (subfield, newValue) => {
@@ -515,10 +454,7 @@
   };
 
   /**
-   * Gets the value from TextWithSummary type value.
-   *
    * @param {HTMLElement} subfield
-   *
    * @returns {string}
    */
   const getTextWithSummaryValue = (subfield) => {
@@ -552,11 +488,8 @@
   };
 
   /**
-   * Sets the value to TextWithSummary type value.
-   *
    * @param {HTMLElement} subfield
    * @param {string} newValue
-   *
    * @returns {string}
    */
   const setTextWithSummaryValue = (subfield, newValue) => {
@@ -612,10 +545,7 @@
   };
 
   /**
-   * Gets the value from TextLong type value.
-   *
    * @param {HTMLElement} subfield
-   *
    * @returns {string}
    */
   const getTextLongValue = (subfield) => {
@@ -638,11 +568,8 @@
   };
 
   /**
-   * Sets the value to TextLong type value.
-   *
    * @param {HTMLElement} subfield
    * @param {string} newValue
-   *
    * @returns {string}
    */
   const setTextLongValue = (subfield, newValue) => {
@@ -653,7 +580,7 @@
       textFieldWrapper.querySelectorAll("div.ck").length > 0;
 
     if (hasCKEditorEnabled) {
-      // use ckeditor instance to update the dom
+      // use ckeditor instance to update the DOM
       const editorElement = textFieldWrapper.querySelector(
         ".ck-editor__editable",
       );
@@ -670,11 +597,9 @@
   };
 
   /**
-   * Creates language select from config.
-   *
-   * @param {Object} config - Configuration object
-   * @param {string} name - Name of an option
-   * @param {string} id - ID of an option
+   * @param {Object} config
+   * @param {string} name
+   * @param {string} id
    *
    * @returns {HTMLSelectElement}
    */
@@ -692,13 +617,10 @@
   };
 
   /**
-   * Creates language options for select from config.
-   *
-   * @param {Object} value - Configuration object
-   * @param {string} name - Name of an option
-   * @param {string} currentLanguage - Current language of the content
-   *
-   * @returns {string} - NOTE: as string
+   * @param {Object} value
+   * @param {string} name
+   * @param {string} currentLanguage
+   * @returns {string}
    */
   const getOptionTag = (value, name, currentLanguage) => {
     // if (currentLanguage.toString() === value.toString()) return ""; Possibly not useful in Drupal context
@@ -710,10 +632,7 @@
   };
 
   /**
-   * Creates a div with all neccessary action elements
-   *
-   * @param {string} uid - uid of a collection
-   *
+   * @param {string} uid
    * @returns {HTMLDivElement}
    */
   const getTransladeActions = (uid) => {
@@ -812,4 +731,4 @@
 
     setSession(data);
   }
-})(jQuery, Drupal, once);
+})(Drupal, once);

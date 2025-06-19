@@ -1,11 +1,15 @@
 <?php
 
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Form\FormStateInterface;
+
 /**
- * Implements hook_form_FORM_ID_alter().
- * We need to alter the node edit form depending on the content type and create shadow JS DOM for interaction.
+ * @param $form
+ * @param FormStateInterface $form_state
+ * @param $form_id
+ * @return void
  */
-function translade_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
-    // get saved content types from config
+function translade_form_alter(&$form, FormStateInterface $form_state, $form_id): void {
     $weight = 0;
     $config = \Drupal::config('translade.settings');
     $content_types = $config->get('content_types') ?: [];
@@ -50,7 +54,7 @@ function translade_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
                 $field_type = $def->getType();
                 if (in_array($field_type, get_supported_field_types())) {
                     // change class for js rendering
-                    $uid = \Drupal\Component\Utility\Html::getClass($field_name . '-' . $form_entity->id() . '-' . time());
+                    $uid = Html::getClass($field_name . '-' . $form_entity->id() . '-' . time());
                     $form[$field_name]['#attributes']['class'][] = 'translade-field-' . $uid . ' translade-type-' . $field_type;
                     $form[$field_name]['translade_shadow_root'] = [
                         '#type' => 'markup',
@@ -63,13 +67,10 @@ function translade_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
 }
 
 /**
- * Returns an array of field types that are supported for translation.
- *
- * @return array
- *   An array of supported field types.
+ * @return string[]
  */
-function get_supported_field_types() {
-    // Translade currently supports main text formats
+function get_supported_field_types(): array {
+    // supported types
     return [
         'string',
         'string_long',
@@ -78,5 +79,3 @@ function get_supported_field_types() {
         'text_with_summary',
     ];
 }
-
-?>

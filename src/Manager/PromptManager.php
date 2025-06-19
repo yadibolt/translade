@@ -4,13 +4,9 @@ namespace Drupal\translade\Manager;
 
 class PromptManager
 {
-  public function __construct() {
-    // nothing there
-  }
+  public function __construct() {}
 
   /**
-   * Returns the translation prompt
-   *
    * @param array $tokens
    * @return string
    */
@@ -29,8 +25,6 @@ class PromptManager
   }
 
   /**
-   * Returns the rephrase prompt
-   *
    * @param array $tokens
    * @return string
    */
@@ -74,8 +68,6 @@ class PromptManager
   }
 
   /**
-   * Formats the prompt by replacing tokens with their values.
-   *
    * @param string $prompt
    * @param array $tokens
    * @return string

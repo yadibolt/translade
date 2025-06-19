@@ -4,27 +4,21 @@ namespace Drupal\translade\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\translade\Connector\OpenAIConnector;
-use Drupal\translade\Manager\LanguageManager;
 use Drupal\translade\Manager\PromptManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 class APIController extends ControllerBase {
 
+  public function __construct() {}
+
   /**
-   * Translates text using OpenAI API.
-   * This is a callback function for API endpoint /translade/translate.
-   *
    * @param \Symfony\Component\HttpFoundation\Request $request
-   *   The request object containing the translation parameters.
-   *
    * @return \Symfony\Component\HttpFoundation\JsonResponse
-   *   A JSON response containing the translated text or an error message.
    */
   public function translate(Request $request) {
     $OpenAI_connector = new OpenAIConnector();
     $prompt_manager = new PromptManager();
 
-    // get the JSON content from the request
     $content = json_decode($request->getContent(), TRUE);
 
     if (!$content) return new JsonResponse(['error' => 'Invalid JSON data.'], 400);
@@ -35,7 +29,6 @@ class APIController extends ControllerBase {
     $source_lang = $content['source_lang'] ?? '';
     $target_lang = $content['target_lang'] ?? '';
 
-    // if any field is empty, return an error
     if (empty($form_id) || empty($text) || empty($source_lang) || empty($target_lang) || empty($trigger_id)) {
       return new JsonResponse(['error' => 'Missing required parameters'], 400);
     }
@@ -51,7 +44,7 @@ class APIController extends ControllerBase {
       [
         'model' => $OpenAI_connector->getModel(),
         'temperature' => 0,
-        'messages' => [ // create 'conversation' array
+        'messages' => [
           [
             'role' => 'system',
             'content' => $prompt,
@@ -62,7 +55,7 @@ class APIController extends ControllerBase {
           ],
         ]
       ],
-      'chat/completions' // endpoint
+      'chat/completions'
     );
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
@@ -73,7 +66,6 @@ class APIController extends ControllerBase {
       return new JsonResponse(['error' => 'Translation failed'], 500);
     }
 
-    // return the translated text as a JSON response
     return new JsonResponse([
       'status' => 'ok',
       'translated_text' => $translated_text,
@@ -86,8 +78,6 @@ class APIController extends ControllerBase {
   }
 
   /**
-   * Rephrases text using OpenAI API.
-   *
    * @param Request $request
    * @return JsonResponse
    */
@@ -95,7 +85,6 @@ class APIController extends ControllerBase {
     $OpenAI_connector = new OpenAIConnector();
     $prompt_manager = new PromptManager();
 
-    // get the JSON content from the request
     $content = json_decode($request->getContent(), TRUE);
 
     if (!$content) return new JsonResponse(['error' => 'Invalid JSON data.'], 400);
@@ -105,7 +94,6 @@ class APIController extends ControllerBase {
     $trigger_id = $content['trigger_id'] ?? '';
     $source_lang = $content['source_lang'] ?? '';
 
-    // if any field is empty, return an error
     if (empty($form_id) || empty($text) || empty($source_lang) || empty($trigger_id)) {
       return new JsonResponse(['error' => 'Missing required parameters'], 400);
     }
@@ -120,7 +108,7 @@ class APIController extends ControllerBase {
       [
         'model' => $OpenAI_connector->getModel(),
         'temperature' => 0,
-        'messages' => [ // create 'conversation' array
+        'messages' => [
           [
             'role' => 'system',
             'content' => $prompt,
@@ -131,7 +119,7 @@ class APIController extends ControllerBase {
           ],
         ]
       ],
-      'chat/completions' // endpoint
+      'chat/completions'
     );
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
@@ -142,7 +130,6 @@ class APIController extends ControllerBase {
       return new JsonResponse(['error' => 'Translation failed'], 500);
     }
 
-    // return the translated text as a JSON response
     return new JsonResponse([
       'status' => 'ok',
       'rephrased_text' => $rephrased_text,
@@ -152,5 +139,4 @@ class APIController extends ControllerBase {
       'timestamp' => time(),
     ], 200);
   }
-
 }

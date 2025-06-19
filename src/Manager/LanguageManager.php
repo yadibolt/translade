@@ -5,8 +5,8 @@ namespace Drupal\translade\Manager;
 use Drupal\Core\Config\ConfigBase;
 
 class LanguageManager extends ConfigBase {
-  public function __construct() {
-  }
+  
+  public function __construct() {}
 
   public function getLangFromId(string $lang_id): string {
     $config = \Drupal::config('translade.settings') ?: [];
