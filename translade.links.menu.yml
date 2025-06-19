@@ -1,5 +1,11 @@
-translade.admin:
-  title: Translade
+translade.configure:
+  title: Translade Configuration
   description: "Configure AI translation to your liking."
   route_name: translade.configure
+  parent: system.admin_config_system
+
+translade.providers:
+  title: Translade
+  description: "Configure Translade AI Providers"
+  route_name: translade.providers
   parent: system.admin_config_system

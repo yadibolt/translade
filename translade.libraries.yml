@@ -1,7 +1,7 @@
 transladejs:
   version: 1.0
   js:
-    js/translade.js: {}
+    js/dist/main.js: {}
   dependencies:
     - core/drupal
     - core/once
