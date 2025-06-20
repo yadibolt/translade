@@ -1,1 +1,0 @@
-!function(t,a){"use strict";t.behaviors.translade={attach:function(t,n){a("translade","body",t).forEach(function(t){window.transladeHistory={history:[]}})}}}(Drupal,once);

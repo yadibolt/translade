@@ -1,7 +1,7 @@
 import ConfigurationManager from "./Manager/ConfigurationManager";
 import SessionManager from "./Manager/SessionManager";
 import RendererController from "./Controllers/RendererController";
-
+import EventListenerController from "./Controllers/EventListenerController";
 
 (function (Drupal, once) {
   "use strict";
@@ -12,8 +12,9 @@ import RendererController from "./Controllers/RendererController";
 
         window.transladeConfig = new ConfigurationManager().initConfiguration();
         new SessionManager().initSession();
-        rendererController.renderTopBar(window.transladeConfig);
-        rendererController.re
+        rendererController.renderTopBar();
+        rendererController.renderActionsForFields();
+        new EventListenerController().addEventListeners();
       });
     }
   };

@@ -4,14 +4,16 @@ export default class ImageTag {
   src = null;
   alt = null;
 
-  constructor(id = null, classNames = null, src = null, alt = null) {
+  constructor(...attr) {
+    const { id = null, classNames = null, src = null, alt = null } = attr[0] || {};
+
     this.id = id;
     this.classNames = classNames;
     this.src = src;
     this.alt = alt;
   }
 
-  getOfTypeDefault() {
+  getDefault() {
     let imageTag = document.createElement("img");
     if (this.id) {
       imageTag.id = this.id;

@@ -6,7 +6,9 @@ export default class ATag {
   dataset = null;
   content = null;
 
-  constructor(id = null, classNames = null, href = null, title = null, dataset = null, content = null) {
+  constructor(...attr) {
+    const { id = null, classNames = null, href = null, title = null, dataset = null, content = null } = attr[0] || {};
+
     this.id = id;
     this.classNames = classNames;
     this.href = href;
@@ -15,7 +17,7 @@ export default class ATag {
     this.content = content;
   }
 
-  getOfTypeDefault() {
+  getDefault() {
     let aTag = document.createElement("a");
     if (this.id) {
       aTag.id = this.id;

@@ -4,6 +4,10 @@ const moduleDefaults = {
   assetsFolder: '/modules/translade/',
   selectedLangIdDefault: 'default',
   maximumHistoryLength: 10,
+  specialToken: '|TRSLD_SPT|',
+  baseUrl: '/api/translade',
+  translationEndpoint: '/translate',
+  rephraseEndpoint: '/rephrase',
 }
 
 export default moduleDefaults;

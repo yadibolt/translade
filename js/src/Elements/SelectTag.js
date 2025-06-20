@@ -1,26 +1,31 @@
 import OptionTag from "./OptionTag";
 import ExceptionManager from "../Manager/ExceptionManager";
-
 export default class SelectTag {
   id = null;
   name = null;
   options = [];
+  constructor(...attr) {
+    const { id = null, name = null, options = [] } = attr[0] || {};
 
-  constructor(id, name, options = []) {
     this.id = id;
     this.name = name;
     this.options = options;
   }
 
-  getOfTypeDefault() {
+  getDefault() {
     const selectTag = document.createElement('select');
-    selectTag.id = this.id;
-    selectTag.name = this.name;
-
-    this.options.forEach(optionTag => {
-      if (!(optionTag instanceof OptionTag)) return new ExceptionManager().throwException("Invalid OptionTag element provided.", null, null);
-      selectTag.appendChild(optionTag);
-    });
+    if (this.id) {
+      selectTag.id = this.id;
+    }
+    if (this.name) {
+      selectTag.name = this.name;
+    }
+    if (this.options.length > 0) {
+      this.options.forEach(optionTag => {
+        if (!optionTag) return new ExceptionManager().throwException("Invalid OptionTag element provided.", null, null);
+        selectTag.appendChild(optionTag);
+      });
+    }
 
     return selectTag;
   }

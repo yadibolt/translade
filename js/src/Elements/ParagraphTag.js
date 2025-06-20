@@ -3,13 +3,15 @@ export default class ParagraphTag {
   classNames = null;
   content = null;
 
-  constructor(id = null, classNames = null, content = null) {
+  constructor(...attr) {
+    const { id = null, classNames = null, content = null } = attr[0] || {};
+
     this.id = id;
     this.classNames = classNames;
     this.content = content;
   }
 
-  getOfTypeDefault() {
+  getDefault() {
     let paragraphTag = document.createElement("p");
     if (this.id) {
       paragraphTag.id = this.id;

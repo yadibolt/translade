@@ -1,5 +1,6 @@
-import DivTag from "../Elements/DivTag";
 import moduleDefaults from "../Defaults/ModuleDefault";
+
+import DivTag from "../Elements/DivTag";
 import ImageTag from "../Elements/ImageTag";
 import SpanTag from "../Elements/SpanTag";
 import ATag from "../Elements/ATag";
@@ -9,35 +10,35 @@ export default class ActionsController {
   }
 
   createActionsForField(fieldId) {
-    const wrapper = new DivTag(null, ['translade-actions-wrapper'], null).getOfTypeDefault();
-    const backIcon = new ImageTag(null, null, `${moduleDefaults.assetsFolder}/icons/back.svg`, 'Back').getOfTypeDefault();
-    const translateIcon = new ImageTag(null, null, `${moduleDefaults.assetsFolder}/icons/translate.svg`, 'Translate').getOfTypeDefault();
-    const rephraseIcon = new ImageTag(null, null, `${moduleDefaults.assetsFolder}/icons/rephrase.svg`, 'Rephrase').getOfTypeDefault();
-    const loaderIcon = new SpanTag(null, ['loader'], null).getOfTypeDefault();
-    const aBack = new ATag(
-      null, ["translade-action-trigger", "back"],
-      null, 'Back to previous text', {
+    const wrapper = new DivTag({classNames: ['translade-actions-wrapper']}).getDefault();
+    const backIcon = new ImageTag({src: `${moduleDefaults.assetsFolder}/icons/back.svg`, alt: "Back"}).getDefault();
+    const translateIcon = new ImageTag({src: `${moduleDefaults.assetsFolder}/icons/translate.svg`, alt: 'Translate'}).getDefault();
+    const rephraseIcon = new ImageTag({src: `${moduleDefaults.assetsFolder}/icons/rephrase.svg`, alt: 'Rephrase'}).getDefault();
+    const loaderIcon = new SpanTag({classNames: ['loader']}).getDefault();
+    const aBack = new ATag({
+      classNames: ["translade-action-trigger", "back"],
+      alt: 'Back to previous text',
+      dataset: {
         targetField: fieldId,
-      }, null
-    ).getOfTypeDefault(); aBack.appendChild(backIcon);
-    const aTranslate = new ATag(
-      null, ["translade-action-trigger", "translate"],
-      null, 'Translate text', {
+      }}).getDefault(); aBack.appendChild(backIcon);
+    const aTranslate = new ATag({
+      classNames: ["translade-action-trigger", "translate"],
+      alt: 'Translate text',
+      dataset: {
         targetField: fieldId,
-      }, null
-    ).getOfTypeDefault(); aTranslate.appendChild(translateIcon);
-    const aRephrase = new ATag(
-      null, ["translade-action-trigger", "rephrase"],
-      null, 'Rephrase text', {
+      }}).getDefault(); aTranslate.appendChild(translateIcon);
+    const aRephrase = new ATag({
+      classNames: ["translade-action-trigger", "rephrase"],
+      alt: 'Rephrase text',
+      dataset: {
         targetField: fieldId,
-      }, null
-    ).getOfTypeDefault(); aRephrase.appendChild(rephraseIcon);
-    const aLoader = new ATag(
-      null, ["translade-action-trigger", "load", "action-hide"],
-      null, 'Loading', {
+      }}).getDefault(); aRephrase.appendChild(rephraseIcon);
+    const aLoader = new ATag({
+      classNames: ["translade-action-trigger", "load", "action-hide"],
+      alt: 'Loading',
+      dataset: {
         targetField: fieldId,
-      }, null
-    ).getOfTypeDefault(); aLoader.appendChild(loaderIcon);
+      }}).getDefault(); aLoader.appendChild(loaderIcon);
 
     [aBack, aTranslate, aRephrase, aLoader].forEach((children, _) => {
       wrapper.appendChild(children);

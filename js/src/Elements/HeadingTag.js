@@ -4,14 +4,16 @@ export default class HeadingTag {
   level = null;
   content = null;
 
-  constructor(id = null, classNames = null, level = 1, content = null) {
+  constructor(...attr) {
+    const { id = null, classNames = null, level = 1, content = null } = attr[0] || {};
+
     this.id = id;
     this.classNames = classNames;
     this.level = level;
     this.content = content;
   }
 
-  getOfTypeDefault() {
+  getDefault() {
     let headingTag = document.createElement(`h${this.level}`);
     if (this.id) {
       headingTag.id = this.id;

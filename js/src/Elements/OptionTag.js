@@ -1,24 +1,27 @@
 export default class OptionTag {
   name = null;
   value = null;
-  isSelected = null;
+  isSelected = false;
 
-  /**
-   * @param name
-   * @param value
-   * @param isSelected
-   */
-  constructor(name, value, isSelected) {
+  constructor(...attr) {
+    const { name = null, value = null, isSelected = false } = attr[0] || {};
+
     this.name = name;
     this.value = value;
     this.isSelected = isSelected;
   }
 
-  getOfTypeDefault() {
+  getDefault() {
     const optionTag = document.createElement('option');
-    optionTag.value = this.value;
-    optionTag.name = name;
-    optionTag.selected = this.isSelected;
+    if (this.value) {
+      optionTag.setAttribute('value', this.value);
+    }
+    if (this.name) {
+      optionTag.innerHTML = this.name;
+    }
+    if (this.isSelected) {
+      optionTag.setAttribute('selected', 'selected');
+    }
 
     return optionTag;
   }

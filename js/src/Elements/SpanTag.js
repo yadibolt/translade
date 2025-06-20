@@ -3,13 +3,15 @@ export default class SpanTag {
   classNames = null;
   content = null;
 
-  constructor(id = null, classNames = null, content = null) {
+  constructor(...attr) {
+    const { id = null, classNames = null, content = null } = attr[0] || {};
+
     this.id = id;
     this.classNames = classNames;
     this.content = content;
   }
 
-  getOfTypeDefault() {
+  getDefault() {
     let spanTag = document.createElement("span");
     if (this.id) {
       spanTag.id = this.id;

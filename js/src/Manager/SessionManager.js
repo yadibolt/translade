@@ -1,6 +1,7 @@
-import ExceptionManager from "./ExceptionManager";
 import moduleDefaults from "../Defaults/ModuleDefault";
 import sessionDefault from "../Defaults/SessionDefault";
+
+import ExceptionManager from "./ExceptionManager";
 
 export default class SessionManager {
   sessionIdentifier = null;
