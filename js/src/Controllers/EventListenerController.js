@@ -1,4 +1,4 @@
-import { getById, getFirstBySelector } from "../Util/HTMLUtil";
+import { getAllByClass, getById, getFirstBySelector } from "../Util/HTMLUtil";
 import FieldsController from "./FieldsController";
 import APIController from "./APIController";
 import FieldHistoryController from "./FieldHistoryController";
@@ -78,25 +78,39 @@ export default class EventListenerController {
   }
 
   _evListLanguageChange() {
-    const selectLang = getById("translade-languageTo");
-    if (!selectLang) return;
+    const fields = new FieldsController().getShadowRootFields();
 
-    const sessionManager = new SessionManager();
+    fields.forEach((field, _) => {
+      const actionLanguageChange = getFirstBySelector(
+        "div.language-select select",
+        field,
+      );
+      if (!actionLanguageChange) return;
 
-    if (
-      sessionManager.getSession().selectedLangId.toString() ===
-      moduleDefaults.selectedLangIdDefault.toString()
-    ) {
-      // sef default if the value is not set
-      sessionManager.updateData({
-        selectedLangId: selectLang.value.toString(),
-      });
-    }
-    selectLang.addEventListener("change", (event) => {
-      event.preventDefault();
+      const sessionManager = new SessionManager();
 
-      sessionManager.updateData({
-        selectedLangId: event.target.value.toString(),
+      if (
+        sessionManager.getSession().selectedLangId.toString() ===
+        moduleDefaults.selectedLangIdDefault.toString()
+      ) {
+        // sef default if the value is not set
+        sessionManager.updateData({
+          selectedLangId: selectLang.value.toString(),
+        });
+      }
+
+      actionLanguageChange.addEventListener("change", (event) => {
+        event.preventDefault();
+
+        sessionManager.updateData({
+          selectedLangId: event.target.value.toString(),
+        });
+
+        // update other selects
+        const selects = getAllByClass("translade-languageTo", document);
+        for (const select of selects) {
+          select.value = event.target.value.toString();
+        }
       });
     });
   }

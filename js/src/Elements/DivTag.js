@@ -1,14 +1,21 @@
 export default class DivTag {
   id = null;
   classNames = null;
+  dataset = {};
   content = null;
 
   constructor(...attr) {
-    const { id = null, classNames = null, content = null } = attr[0] || {};
+    const {
+      id = null,
+      dataset = {},
+      classNames = null,
+      content = null,
+    } = attr[0] || {};
 
     this.id = id;
     this.classNames = classNames;
     this.content = content;
+    this.dataset = dataset;
   }
 
   getDefault() {
@@ -21,6 +28,11 @@ export default class DivTag {
     }
     if (this.content) {
       divTag.innerHTML = this.content;
+    }
+    if (this.dataset) {
+      for (const [key, value] of Object.entries(this.dataset)) {
+        divTag.dataset[key] = value;
+      }
     }
 
     return divTag;

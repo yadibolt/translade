@@ -2,12 +2,19 @@ import OptionTag from "./OptionTag";
 import ExceptionManager from "../Manager/ExceptionManager";
 export default class SelectTag {
   id = null;
+  classNames = [];
   name = null;
   options = [];
   constructor(...attr) {
-    const { id = null, name = null, options = [] } = attr[0] || {};
+    const {
+      id = null,
+      classNames = [],
+      name = null,
+      options = [],
+    } = attr[0] || {};
 
     this.id = id;
+    this.classNames = classNames;
     this.name = name;
     this.options = options;
   }
@@ -16,6 +23,9 @@ export default class SelectTag {
     const selectTag = document.createElement("select");
     if (this.id) {
       selectTag.id = this.id;
+    }
+    if (this.classNames.length > 0) {
+      selectTag.classList.add(...this.classNames);
     }
     if (this.name) {
       selectTag.name = this.name;

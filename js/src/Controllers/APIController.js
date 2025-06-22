@@ -21,6 +21,10 @@ export default class APIController {
     let actionTranslate = getFirstBySelector("a.translate", mainField);
     let actionRephrase = getFirstBySelector("a.rephrase", mainField);
     let actionLoader = getFirstBySelector("a.load", mainField);
+    let actionLanguageSelect = getFirstBySelector(
+      "div.language-select",
+      mainField,
+    );
 
     const body = {
       form_id: String(config.formId),
@@ -32,7 +36,7 @@ export default class APIController {
 
     swapActiveClassName(
       [actionLoader],
-      [actionBack, actionTranslate, actionRephrase],
+      [actionBack, actionTranslate, actionRephrase, actionLanguageSelect],
       "action-hide",
     );
 
@@ -55,7 +59,12 @@ export default class APIController {
             !data.trigger_id
           ) {
             swapActiveClassName(
-              [actionBack, actionTranslate, actionRephrase],
+              [
+                actionBack,
+                actionTranslate,
+                actionRephrase,
+                actionLanguageSelect,
+              ],
               [actionLoader],
               "action-hide",
             );
@@ -69,7 +78,7 @@ export default class APIController {
           fieldHistoryController.setHistoryData(fieldId);
 
           swapActiveClassName(
-            [actionBack, actionTranslate, actionRephrase],
+            [actionBack, actionTranslate, actionRephrase, actionLanguageSelect],
             [actionLoader],
             "action-hide",
           );
@@ -78,7 +87,7 @@ export default class APIController {
         })
         .catch((e) => {
           swapActiveClassName(
-            [actionBack, actionTranslate, actionRephrase],
+            [actionBack, actionTranslate, actionRephrase, actionLanguageSelect],
             [actionLoader],
             "action-hide",
           );
@@ -98,6 +107,10 @@ export default class APIController {
     let actionTranslate = getFirstBySelector("a.translate", mainField);
     let actionRephrase = getFirstBySelector("a.rephrase", mainField);
     let actionLoader = getFirstBySelector("a.load", mainField);
+    let actionLanguageSelect = getFirstBySelector(
+      "div.language-select",
+      mainField,
+    );
 
     const body = {
       form_id: String(config.formId),
@@ -108,7 +121,7 @@ export default class APIController {
 
     swapActiveClassName(
       [actionLoader],
-      [actionBack, actionTranslate, actionRephrase],
+      [actionBack, actionTranslate, actionRephrase, actionLanguageSelect],
       "action-hide",
     );
 
@@ -131,7 +144,12 @@ export default class APIController {
           ) {
             swapActiveClassName(
               [actionLoader],
-              [actionBack, actionTranslate, actionRephrase],
+              [
+                actionBack,
+                actionTranslate,
+                actionRephrase,
+                actionLanguageSelect,
+              ],
               "action-hide",
             );
             reject("Returned data do not follow the structure.");
@@ -144,7 +162,7 @@ export default class APIController {
           fieldHistoryController.setHistoryData(fieldId);
 
           swapActiveClassName(
-            [actionBack, actionTranslate, actionRephrase],
+            [actionBack, actionTranslate, actionRephrase, actionLanguageSelect],
             [actionLoader],
             "action-hide",
           );
@@ -153,7 +171,7 @@ export default class APIController {
         })
         .catch((e) => {
           swapActiveClassName(
-            [actionBack, actionTranslate, actionRephrase],
+            [actionBack, actionTranslate, actionRephrase, actionLanguageSelect],
             [actionLoader],
             "action-hide",
           );

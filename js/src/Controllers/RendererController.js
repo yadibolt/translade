@@ -1,6 +1,3 @@
-import OptionTag from "../Elements/OptionTag";
-import SessionManager from "../Manager/SessionManager";
-import SelectTag from "../Elements/SelectTag";
 import DivTag from "../Elements/DivTag";
 import HeadingTag from "../Elements/HeadingTag";
 import ParagraphTag from "../Elements/ParagraphTag";
@@ -16,26 +13,6 @@ export default class RendererController {
   renderTopBar() {
     const shadowRoot = getById("translade-mount-shadow-root");
 
-    let languageOptions = [];
-    window.transladeConfig.languages.forEach((language, _) => {
-      const values = language.split("|");
-      const isSelected =
-        values[1] === new SessionManager().getSession().selectedLangId;
-      // values[0] is the language ID, values[1] is the language name
-      languageOptions.push(
-        new OptionTag({
-          name: values[1],
-          value: values[0],
-          isSelected: isSelected,
-        }).getDefault(),
-      );
-    });
-
-    const languageSelect = new SelectTag({
-      id: "translade-languageTo",
-      name: "translade-languageTo",
-      options: languageOptions,
-    }).getDefault();
     const wrapper = new DivTag({
       classNames: ["translade-wrapper"],
     }).getDefault();
@@ -47,7 +24,7 @@ export default class RendererController {
       content: "Select a language to translate to.",
     }).getDefault();
 
-    [title, languageSelect, description].forEach((children, _) => {
+    [title, description].forEach((children, _) => {
       wrapper.appendChild(children);
     });
 
