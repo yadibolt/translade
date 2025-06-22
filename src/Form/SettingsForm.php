@@ -6,6 +6,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\translade\Connector\OpenAIConnector;
 use Drupal\commerce_product\Entity\ProductVariationType;
+use Drupal\translade\Manager\DefaultsManager;
 
 class SettingsForm extends ConfigFormBase {
   /**
@@ -30,6 +31,7 @@ class SettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form['#attached']['library'][] = 'translade/transladecss';
 
+    $defaults_manager = new DefaultsManager();
     $weight = 0;
     $config = $this->config('translade.settings') ?: [];
 
@@ -95,28 +97,20 @@ class SettingsForm extends ConfigFormBase {
       '#weight' => $weight++,
     ];
 
+    $form['options']['content_ai_actions'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Enable these AI actions:'),
+      '#options' => $defaults_manager->getAvailableContentAIActions(),
+      '#default_value' => $this->prepareDefaultOptionsFromConfigAIActions($config),
+      '#weight' => $weight++,
+    ];
+
     $form['prompt_options'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Prompt options'),
       '#weight' => $weight++,
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
-    ];
-
-    $form['prompt_options']['override_translation'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Translation Prompt'),
-      '#description' => $this->t('You can override the default translation prompt used, if you want to. Leaving this field empty will use the default prompt, which is recommended.'),
-      '#default_value' => $config->get('override_translation') ?: '',
-      '#weight' => $weight++,
-    ];
-
-    $form['prompt_options']['override_rephrase'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Rephrase Prompt'),
-      '#description' => $this->t('You can override the default rephrase prompt used, if you want to. Leaving this field empty will use the default prompt, which is recommended.'),
-      '#default_value' => $config->get('override_rephrase') ?: '',
-      '#weight' => $weight++,
     ];
 
     $form['languages'] = [
@@ -131,8 +125,8 @@ class SettingsForm extends ConfigFormBase {
     $form['languages']['languages_area'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Languages'),
-      '#description' => $this->t('Enter the languages you want to translate to and from, separated by commas and pipe to define it\'s name. For example: "en|English,fr|French,de|German".'),
-      '#default_value' => $config->get('languages') ?: 'en|English,sk|Slovak',
+      '#description' => $this->t('Enter the languages you want to translate to and from, separated by commas and pipe to define it\'s name. For example: "en:English,fr:French,de:German".'),
+      '#default_value' => $config->get('languages') ?: 'en:English,sk:Slovak',
       '#weight' => $weight++,
     ];
 
@@ -154,18 +148,13 @@ class SettingsForm extends ConfigFormBase {
     if (!empty($override_translation) && strlen($override_translation) < 10) {
       $form_state->setErrorByName('override_translation', $this->t('The override prompt must be at least 10 characters long.'));
     }
-    // prompt
-    $override_rephrase = $form_state->getValue('override_rephrase');
-    if (!empty($override_rephrase) && strlen($override_rephrase) < 10) {
-      $form_state->setErrorByName('override_rephrase', $this->t('The override prompt must be at least 10 characters long.'));
-    }
 
     // language
     $languages = $form_state->getValue('languages_area');
-    if (!str_contains($languages, '|')) {
-        $form_state->setErrorByName('languages_area', $this->t('Please ensure that each language is defined with a name and a code, separated by a pipe (|). For example: "en|English,fr|French".'));
+    if (!str_contains($languages, ':')) {
+        $form_state->setErrorByName('languages_area', $this->t('Please ensure that each language is defined with a name and a code, separated by a  (:). For example: "en:English,fr:French".'));
     }
-    if (!preg_match('/^[a-zA-Z|, ]+$/', $languages)) {
+    if (!preg_match('/^[a-zA-Z:, ]+$/', $languages)) {
         $form_state->setErrorByName('languages_area', $this->t('Please ensure that the languages are defined correctly, using only letters, commas, and pipes.'));
     }
   }
@@ -194,6 +183,22 @@ class SettingsForm extends ConfigFormBase {
       \Drupal::messenger()->addStatus($this->t('Translation content types have been updated.'));
     }
 
+    // ai actions
+    $selected_ai_actions = array_filter($form_state->getValue('content_ai_actions'));
+
+    $aiactypes = $this->prepareOptionsFromFormDataAIActions($selected_ai_actions);
+    $aiastypes = $this->prepareDefaultOptionsFromConfigAIActions($config);
+    sort($aiactypes);
+    sort($aiastypes);
+
+    if ($aiactypes !== $aiastypes) {
+      $this->config('translade.settings')
+          ->set('content_ai_actions', $selected_ai_actions)
+          ->save();
+
+      \Drupal::messenger()->addStatus($this->t('Translation content types have been updated.'));
+    }
+
     // api key
     $api_key = $form_state->getValue('api_key');
 
@@ -214,24 +219,6 @@ class SettingsForm extends ConfigFormBase {
             ->save();
         \Drupal::messenger()->addStatus($this->t('OpenAI model has been set to @model.', ['@model' => $model]));
       }
-    }
-
-    // override_translation
-    $override_translation = $form_state->getValue('override_translation');
-    if ($override_translation !== $this->config('translade.settings')->get('override_translation')) {
-      $this->config('translade.settings')
-        ->set('override_translation', $override_translation)
-        ->save();
-      \Drupal::messenger()->addStatus($this->t('Translation prompt has been updated.'));
-    }
-
-    // override_rephrase
-    $override_rephrase = $form_state->getValue('override_rephrase');
-    if ($override_rephrase !== $this->config('translade.settings')->get('override_rephrase')) {
-      $this->config('translade.settings')
-        ->set('override_rephrase', $override_rephrase)
-        ->save();
-      \Drupal::messenger()->addStatus($this->t('Rephrase prompt has been updated.'));
     }
 
     // languages
@@ -296,6 +283,20 @@ class SettingsForm extends ConfigFormBase {
     return $default_options;
   }
 
+  public function prepareDefaultOptionsFromConfigAIActions($config = NULL) {
+    if ($config === NULL) {
+      return [];
+    }
+
+    $default_options = $config->get('content_ai_actions') ?: [];
+
+    if (!is_array($default_options)) {
+      $default_options = [];
+    }
+
+    return $default_options;
+  }
+
   /**
    * Prepares checkbox options from form data.
    *
@@ -306,6 +307,20 @@ class SettingsForm extends ConfigFormBase {
    *   An array of options for content types checkboxes.
    */
   public function prepareOptionsFromFormData($data) {
+    if ($data === NULL) {
+        return [];
+    }
+
+    $default_options = $data ?: [];
+
+    if (!is_array($default_options)) {
+      $default_options = [];
+    }
+
+    return $default_options;
+  }
+
+  public function prepareOptionsFromFormDataAIActions($data) {
     if ($data === NULL) {
         return [];
     }

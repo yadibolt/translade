@@ -2,6 +2,7 @@
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\translade\Manager\DefaultsManager;
 
 /**
  * @param $form
@@ -13,6 +14,9 @@ function translade_form_alter(&$form, FormStateInterface $form_state, $form_id):
     $weight = 0;
     $config = \Drupal::config('translade.settings');
     $content_types = $config->get('content_types') ?: [];
+    $content_ai_actions = $config->get('content_ai_actions') ?: [];
+    $defaults_manager = new DefaultsManager();
+    $all_ai_actions = $defaults_manager->getAvailableContentAIActions();
 
     $form_shorthand_type = "node_";
     if (str_contains($form_id, 'commerce_product')) $form_shorthand_type = "commerce_product_";
@@ -33,6 +37,11 @@ function translade_form_alter(&$form, FormStateInterface $form_state, $form_id):
               $current_language_id = \Drupal::languageManager()->getDefaultLanguage()->getId();
             }
 
+            $selected_ai_actions_arr = [];
+            foreach ($content_ai_actions as $key => $value) {
+                $selected_ai_actions_arr[] = $key . ":" . $all_ai_actions[$key];
+            }
+
             // add shadow DOM element for config
             $form['translade_shadow_root_config'] = [
                 '#type' => 'textarea',
@@ -42,6 +51,7 @@ function translade_form_alter(&$form, FormStateInterface $form_state, $form_id):
                 '#value' => json_encode([
                     'languages' => $config->get('languages') ?: [],
                     'content_language' => $current_language_id,
+                    'content_ai_actions' => $selected_ai_actions_arr,
                     'form_id' => $form_id,
                 ]),
                 '#weight' => $weight++,
@@ -52,7 +62,7 @@ function translade_form_alter(&$form, FormStateInterface $form_state, $form_id):
 
             foreach ($definitions as $field_name => $def) {
                 $field_type = $def->getType();
-                if (in_array($field_type, get_supported_field_types())) {
+                if (in_array($field_type, $defaults_manager->getSupportedFieldTypes())) {
                     // change class for js rendering
                     $uid = Html::getClass($field_name . '-' . $form_entity->id() . '-' . time());
                     $form[$field_name]['#attributes']['class'][] = 'translade-field-' . $uid . ' translade-type-' . $field_type;
@@ -64,18 +74,4 @@ function translade_form_alter(&$form, FormStateInterface $form_state, $form_id):
             }
         }
     }
-}
-
-/**
- * @return string[]
- */
-function get_supported_field_types(): array {
-    // supported types
-    return [
-        'string',
-        'string_long',
-        'text',
-        'text_long',
-        'text_with_summary',
-    ];
 }

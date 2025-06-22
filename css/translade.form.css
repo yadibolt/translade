@@ -2,35 +2,6 @@
   display: none;
 }
 
-.translade-wrapper {
-  border: 2px solid black;
-  border-radius: 0.5rem;
-  padding: 1rem 1.25rem;
-  background-color: white;
-}
-
-.translade-wrapper h3 {
-  margin: 0.5rem 0;
-  font-weight: bold;
-  font-size: 1.5rem;
-}
-
-.translade-wrapper p {
-  margin: 0.5rem 0;
-  font-size: 0.9rem;
-}
-
-#translade-languageFrom,
-#translade-languageTo {
-  background-color: black;
-  border: black;
-  color: rgb(225, 225, 225);
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-  margin-right: 0.5rem;
-}
-
 [class*="translade-field-"] {
   position: relative;
 }
@@ -43,9 +14,12 @@
 .translade-actions-wrapper {
   display: flex;
   width: fit-content;
-  border: 2px solid black;
-  border-radius: 0.5rem;
   overflow: hidden;
+  padding: 0.75rem 0.75rem;
+  background-color: #141414;
+  border-radius: 0.75rem;
+  gap: 0.25rem;
+  border: 1px solid #373737;
 }
 
 .translade-actions-wrapper a {
@@ -54,32 +28,6 @@
   overflow: hidden;
   text-align: center;
   justify-content: center;
-}
-
-.translade-actions-wrapper a:hover {
-  cursor: pointer;
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.translade-actions-wrapper a:nth-child(1) {
-  border-right: 1px solid black;
-}
-
-.translade-actions-wrapper a:nth-child(2) {
-  border-left: 1px solid black;
-  border-right: 1px solid black;
-}
-
-.translade-actions-wrapper a:nth-child(2) img {
-  width: 24px;
-}
-
-.translade-actions-wrapper a:nth-child(3) {
-  border-left: 1px solid black;
-}
-
-.translade-actions-wrapper a:nth-child(3) img {
-  width: 28px;
 }
 
 .translade-shadow-data {
@@ -92,13 +40,13 @@
 
 .loader {
   scale: 0.5;
-  width: 4.8px;
-  height: 4.8px;
+  width: 3.8px;
+  height: 2.8px;
   display: block;
-  margin: 13.5px auto;
+  margin: 15px auto;
   position: relative;
   border-radius: 4px;
-  color: #000;
+  color: #a1a1a1;
   background: currentColor;
   box-sizing: border-box;
   animation: animloader 0.3s 0.3s linear infinite alternate;
@@ -107,8 +55,8 @@
 .loader::before {
   content: "";
   box-sizing: border-box;
-  width: 4.8px;
-  height: 4.8px;
+  width: 3.8px;
+  height: 2.8px;
   border-radius: 4px;
   background: currentColor;
   position: absolute;
@@ -129,4 +77,99 @@
   100% {
     width: 48px;
   }
+}
+
+select.translade-languageTo,
+select.translade-contentAIAction {
+  background-color: #141414;
+  padding: 0.5rem 1.25rem;
+  padding-left: 16px;
+  color: #a1a1a1;
+  font-size: 0.75rem;
+  box-shadow: none;
+  width: 170px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("/modules/translade/icons/dropdown.svg");
+  background-size: 16px;
+  padding-right: 30px;
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  border: 1px solid #373737;
+  height: 34.5px;
+  border-radius: 0.5rem;
+}
+
+select.translade-languageTo:hover,
+select.translade-contentAIAction:hover {
+  cursor: pointer;
+}
+
+select.translade-languageTo:focus,
+select.translade-contentAIAction:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+a.translade-action-trigger {
+  height: 34.5px;
+  width: 34.5px;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+
+div.translade-action-trigger {
+  position: relative;
+}
+
+a.translade-action-trigger img {
+  width: 34.5px;
+  height: auto;
+}
+
+a.translade-action-trigger.translate img {
+  width: 21px;
+  height: auto;
+}
+
+a.translade-action-trigger:hover {
+  cursor: pointer;
+  background-color: #1c1c1c;
+  border-radius: 0.5rem;
+}
+
+label.translade-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 0.55rem;
+  color: #a1a1a1;
+  background-color: #141414;
+  margin-top: -0.5rem;
+  padding: 0 4px;
+  margin: -0.45rem 4px 0 4px;
+}
+
+/* Color options */
+.translade-actions-wrapper.light {
+  border-color: #e5e5e5;
+  background-color: #ffffff;
+}
+
+.translade-actions-wrapper.light .translade-label {
+  color: #808080;
+  background-color: #fff;
+}
+
+.translade-actions-wrapper.light select.translade-languageTo,
+select.translade-contentAIAction {
+  color: #808080;
+  background-color: #fff;
+  border-color: #e5e5e5;
+}
+
+.translade-actions-wrapper.light a.translade-action-trigger:hover {
+  background-color: #e5e5e5;
 }

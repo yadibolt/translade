@@ -18,7 +18,7 @@ class LanguageManager extends ConfigBase {
 
     foreach ($languages_arr as $language) {
       if (str_starts_with(strtolower($language), strtolower($lang_id))) {
-        return explode('|', $language)[1];
+        return explode(':', $language)[1];
       }
     }
 
