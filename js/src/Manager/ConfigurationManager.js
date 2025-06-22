@@ -27,9 +27,14 @@ export default class ConfigurationManager {
 
       configuration.remove();
 
+      let contentAIActions = [];
+      if (Array.isArray(parsedConfiguration.content_ai_actions))
+        contentAIActions = parsedConfiguration.content_ai_actions;
+
       return {
         languages: String(parsedConfiguration.languages).trim().split(","),
         contentLanguage: String(parsedConfiguration.content_language).trim(),
+        contentAIActions: contentAIActions,
         formId: String(parsedConfiguration.form_id),
         history: {},
       };

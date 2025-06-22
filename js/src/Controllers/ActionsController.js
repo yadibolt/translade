@@ -8,14 +8,17 @@ import SpanTag from "../Elements/SpanTag";
 import ATag from "../Elements/ATag";
 import OptionTag from "../Elements/OptionTag";
 import SelectTag from "../Elements/SelectTag";
+import LabelTag from "../Elements/LabelTag";
 
 export default class ActionsController {
   constructor() {}
 
   createActionsForField(fieldId) {
     let languageOptions = [];
+    let contentAIActions = [];
+
     window.transladeConfig.languages.forEach((language, _) => {
-      const values = language.split("|");
+      const values = language.split(":");
       // values[0] is the language ID, values[1] is the language name
       const isSelected =
         values[0] === new SessionManager().getSession().selectedLangId;
@@ -29,13 +32,25 @@ export default class ActionsController {
       );
     });
 
+    contentAIActions.push(
+      new OptionTag({
+        name: "# Action",
+        value: "default",
+      }).getDefault(),
+    );
+    window.transladeConfig.contentAIActions.forEach((action, _) => {
+      const values = action.split(":");
+      // values[0] is the action ID, values[1] is the action name
+      contentAIActions.push(
+        new OptionTag({
+          name: values[1],
+          value: values[0],
+        }).getDefault(),
+      );
+    });
+
     const wrapper = new DivTag({
       classNames: ["translade-actions-wrapper"],
-    }).getDefault();
-    const languageSelect = new SelectTag({
-      classNames: ["translade-languageTo"],
-      name: "translade-languageTo",
-      options: languageOptions,
     }).getDefault();
     const backIcon = new ImageTag({
       src: `${moduleDefaults.assetsFolder}/icons/back.svg`,
@@ -45,19 +60,27 @@ export default class ActionsController {
       src: `${moduleDefaults.assetsFolder}/icons/translate.svg`,
       alt: "Translate",
     }).getDefault();
-    const rephraseIcon = new ImageTag({
-      src: `${moduleDefaults.assetsFolder}/icons/rephrase.svg`,
-      alt: "Rephrase",
+    const languageSelect = new SelectTag({
+      classNames: ["translade-languageTo"],
+      name: "translade-languageTo",
+      options: languageOptions,
+    }).getDefault();
+    const contentAIActionSelect = new SelectTag({
+      classNames: ["translade-contentAIAction"],
+      name: "translade-contentAIAction",
+      options: contentAIActions,
     }).getDefault();
     const loaderIcon = new SpanTag({ classNames: ["loader"] }).getDefault();
 
-    const divLanguageSelect = new DivTag({
-      classNames: ["translade-action-trigger", "language-select"],
-      dataset: {
-        targetField: fieldId,
-      },
+    const languageSelectLabel = new LabelTag({
+      content: "Language to translate to",
+      classNames: ["translade-label"],
     }).getDefault();
-    divLanguageSelect.appendChild(languageSelect);
+    const contentAIActionSelectLabel = new LabelTag({
+      content: "Choose an action",
+      classNames: ["translade-label"],
+    }).getDefault();
+
     const aBack = new ATag({
       classNames: ["translade-action-trigger", "back"],
       title: "Back to previous text",
@@ -74,14 +97,23 @@ export default class ActionsController {
       },
     }).getDefault();
     aTranslate.appendChild(translateIcon);
-    const aRephrase = new ATag({
-      classNames: ["translade-action-trigger", "rephrase"],
-      title: "Rephrase text",
+    const divLanguageSelect = new DivTag({
+      classNames: ["translade-action-trigger", "language-select"],
       dataset: {
         targetField: fieldId,
       },
     }).getDefault();
-    aRephrase.appendChild(rephraseIcon);
+    divLanguageSelect.appendChild(languageSelectLabel);
+    divLanguageSelect.appendChild(languageSelect);
+    const divContentAIActionsSelect = new DivTag({
+      classNames: ["translade-action-trigger", "content-ai-action-select"],
+      dataset: {
+        targetField: fieldId,
+      },
+    }).getDefault();
+    divContentAIActionsSelect.appendChild(contentAIActionSelectLabel);
+    divContentAIActionsSelect.appendChild(contentAIActionSelect);
+
     const aLoader = new ATag({
       classNames: ["translade-action-trigger", "load", "action-hide"],
       title: "Loading",
@@ -91,11 +123,15 @@ export default class ActionsController {
     }).getDefault();
     aLoader.appendChild(loaderIcon);
 
-    [aBack, aTranslate, divLanguageSelect, aRephrase, aLoader].forEach(
-      (children, _) => {
-        wrapper.appendChild(children);
-      },
-    );
+    [
+      aBack,
+      aTranslate,
+      divLanguageSelect,
+      divContentAIActionsSelect,
+      aLoader,
+    ].forEach((children, _) => {
+      wrapper.appendChild(children);
+    });
 
     return wrapper;
   }

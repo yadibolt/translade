@@ -11,8 +11,8 @@ export default class EventListenerController {
   addEventListeners() {
     this._evLisBackAction();
     this._evLisTranslateAction();
-    this._evLisRephraseAction();
     this._evListLanguageChange();
+    this._evLisAIActions();
   }
 
   _evLisBackAction() {
@@ -56,12 +56,15 @@ export default class EventListenerController {
     });
   }
 
-  _evLisRephraseAction() {
+  _evLisAIActions() {
     const fields = new FieldsController().getShadowRootFields();
 
     fields.forEach((field, _) => {
-      const actionRephrase = getFirstBySelector("a.rephrase", field);
-      if (!actionRephrase) return;
+      const actionAIActions = getFirstBySelector(
+        "div.content-ai-action-select select",
+        field,
+      );
+      if (!actionAIActions) return;
 
       const fieldId = field.id.replaceAll(
         // we need to transform the field ID to target the the field with value
@@ -69,10 +72,19 @@ export default class EventListenerController {
         "translade-field-",
       );
 
-      actionRephrase.addEventListener("click", (event) => {
+      actionAIActions.value = "default";
+      actionAIActions.addEventListener("change", (event) => {
         event.preventDefault();
 
-        return new APIController().rephrase(fieldId, field);
+        switch (String(event.target.value)) {
+          case "rewriteRephrase":
+            new APIController().rephrase(fieldId, field);
+            break;
+          case "default":
+            return;
+        }
+
+        actionAIActions.value = "default";
       });
     });
   }
@@ -95,7 +107,7 @@ export default class EventListenerController {
       ) {
         // sef default if the value is not set
         sessionManager.updateData({
-          selectedLangId: selectLang.value.toString(),
+          selectedLangId: actionLanguageChange.value.toString(),
         });
       }
 

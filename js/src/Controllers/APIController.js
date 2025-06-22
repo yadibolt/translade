@@ -19,10 +19,13 @@ export default class APIController {
 
     let actionBack = getFirstBySelector("a.back", mainField);
     let actionTranslate = getFirstBySelector("a.translate", mainField);
-    let actionRephrase = getFirstBySelector("a.rephrase", mainField);
     let actionLoader = getFirstBySelector("a.load", mainField);
     let actionLanguageSelect = getFirstBySelector(
       "div.language-select",
+      mainField,
+    );
+    const actionAIActions = getFirstBySelector(
+      "div.content-ai-action-select",
       mainField,
     );
 
@@ -36,7 +39,7 @@ export default class APIController {
 
     swapActiveClassName(
       [actionLoader],
-      [actionBack, actionTranslate, actionRephrase, actionLanguageSelect],
+      [actionBack, actionTranslate, actionLanguageSelect, actionAIActions],
       "action-hide",
     );
 
@@ -62,8 +65,8 @@ export default class APIController {
               [
                 actionBack,
                 actionTranslate,
-                actionRephrase,
                 actionLanguageSelect,
+                actionAIActions,
               ],
               [actionLoader],
               "action-hide",
@@ -78,7 +81,12 @@ export default class APIController {
           fieldHistoryController.setHistoryData(fieldId);
 
           swapActiveClassName(
-            [actionBack, actionTranslate, actionRephrase, actionLanguageSelect],
+            [
+              actionBack,
+              actionTranslate,
+              actionLanguageSelect,
+              actionAIActions,
+            ],
             [actionLoader],
             "action-hide",
           );
@@ -87,7 +95,12 @@ export default class APIController {
         })
         .catch((e) => {
           swapActiveClassName(
-            [actionBack, actionTranslate, actionRephrase, actionLanguageSelect],
+            [
+              actionBack,
+              actionTranslate,
+              actionLanguageSelect,
+              actionAIActions,
+            ],
             [actionLoader],
             "action-hide",
           );
@@ -105,10 +118,13 @@ export default class APIController {
 
     let actionBack = getFirstBySelector("a.back", mainField);
     let actionTranslate = getFirstBySelector("a.translate", mainField);
-    let actionRephrase = getFirstBySelector("a.rephrase", mainField);
     let actionLoader = getFirstBySelector("a.load", mainField);
     let actionLanguageSelect = getFirstBySelector(
       "div.language-select",
+      mainField,
+    );
+    const actionAIActions = getFirstBySelector(
+      "div.content-ai-action-select",
       mainField,
     );
 
@@ -121,7 +137,7 @@ export default class APIController {
 
     swapActiveClassName(
       [actionLoader],
-      [actionBack, actionTranslate, actionRephrase, actionLanguageSelect],
+      [actionBack, actionTranslate, actionLanguageSelect, actionAIActions],
       "action-hide",
     );
 
@@ -147,8 +163,8 @@ export default class APIController {
               [
                 actionBack,
                 actionTranslate,
-                actionRephrase,
                 actionLanguageSelect,
+                actionAIActions,
               ],
               "action-hide",
             );
@@ -162,7 +178,12 @@ export default class APIController {
           fieldHistoryController.setHistoryData(fieldId);
 
           swapActiveClassName(
-            [actionBack, actionTranslate, actionRephrase, actionLanguageSelect],
+            [
+              actionBack,
+              actionTranslate,
+              actionLanguageSelect,
+              actionAIActions,
+            ],
             [actionLoader],
             "action-hide",
           );
@@ -171,7 +192,12 @@ export default class APIController {
         })
         .catch((e) => {
           swapActiveClassName(
-            [actionBack, actionTranslate, actionRephrase, actionLanguageSelect],
+            [
+              actionBack,
+              actionTranslate,
+              actionLanguageSelect,
+              actionAIActions,
+            ],
             [actionLoader],
             "action-hide",
           );
