@@ -57,9 +57,6 @@ export default class FieldHistoryController {
   getLastHistoryRecord = (fieldId) => {
     let hist = window.transladeConfig.history;
 
-    console.log(fieldId);
-    console.log("history", hist);
-
     if (!hist) return null;
     if (!hist[fieldId] || hist[fieldId] === undefined) return null;
 
