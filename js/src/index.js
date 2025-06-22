@@ -23,7 +23,7 @@ import EventListenerController from "./Controllers/EventListenerController";
 
     window.transladeConfig = new ConfigurationManager().initConfiguration();
     new SessionManager().initSession();
-    rendererController.renderTopBar();
+    // rendererController.renderTopBar();
     rendererController.renderActionsForFields();
     new EventListenerController().addEventListeners();
   };

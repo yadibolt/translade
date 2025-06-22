@@ -50,7 +50,7 @@ export default class ActionsController {
     });
 
     const wrapper = new DivTag({
-      classNames: ["translade-actions-wrapper"],
+      classNames: ["translade-actions-wrapper", "light"], // THEME: dark or light
     }).getDefault();
     const backIcon = new ImageTag({
       src: `${moduleDefaults.assetsFolder}/icons/back.svg`,
