@@ -13,7 +13,7 @@ export default class SelectTag {
   }
 
   getDefault() {
-    const selectTag = document.createElement('select');
+    const selectTag = document.createElement("select");
     if (this.id) {
       selectTag.id = this.id;
     }
@@ -21,8 +21,13 @@ export default class SelectTag {
       selectTag.name = this.name;
     }
     if (this.options.length > 0) {
-      this.options.forEach(optionTag => {
-        if (!optionTag) return new ExceptionManager().throwException("Invalid OptionTag element provided.", null, null);
+      this.options.forEach((optionTag) => {
+        if (!optionTag)
+          return new ExceptionManager().throwException(
+            "Invalid OptionTag element provided.",
+            null,
+            null,
+          );
         selectTag.appendChild(optionTag);
       });
     }

@@ -7,7 +7,14 @@ export default class ATag {
   content = null;
 
   constructor(...attr) {
-    const { id = null, classNames = null, href = null, title = null, dataset = null, content = null } = attr[0] || {};
+    const {
+      id = null,
+      classNames = null,
+      href = null,
+      title = null,
+      dataset = null,
+      content = null,
+    } = attr[0] || {};
 
     this.id = id;
     this.classNames = classNames;

@@ -5,7 +5,12 @@ export default class ImageTag {
   alt = null;
 
   constructor(...attr) {
-    const { id = null, classNames = null, src = null, alt = null } = attr[0] || {};
+    const {
+      id = null,
+      classNames = null,
+      src = null,
+      alt = null,
+    } = attr[0] || {};
 
     this.id = id;
     this.classNames = classNames;

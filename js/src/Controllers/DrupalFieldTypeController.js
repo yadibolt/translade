@@ -1,10 +1,14 @@
 import moduleDefaults from "../Defaults/ModuleDefault";
 
-import {getFirstBySelector, getAllByClass, getAllBySelector, getFirstByClass} from "../Util/HTMLUtil";
+import {
+  getFirstBySelector,
+  getAllByClass,
+  getAllBySelector,
+  getFirstByClass,
+} from "../Util/HTMLUtil";
 
 export default class DrupalFieldTypeController {
-  constructor() {
-  }
+  constructor() {}
 
   getStringTypeValue = (subfield) => {
     const input = getFirstBySelector("input", subfield);
@@ -29,18 +33,36 @@ export default class DrupalFieldTypeController {
       textFieldWrapper = textWithSummary[1];
     }
 
-    const hasCKEditorEnabled = getAllBySelector("div.ck", textFieldWrapper).length > 0;
+    const hasCKEditorEnabled =
+      getAllBySelector("div.ck", textFieldWrapper).length > 0;
 
     if (hasCKEditorEnabled) {
-      const ckEditorValue = getFirstBySelector('.ck .ck.ck-content', textFieldWrapper);
-      const summaryValue = summaryFieldWrapper !== null ? getFirstBySelector('textarea', summaryFieldWrapper) : "";
+      const ckEditorValue = getFirstBySelector(
+        ".ck .ck.ck-content",
+        textFieldWrapper,
+      );
+      const summaryValue =
+        summaryFieldWrapper !== null
+          ? getFirstBySelector("textarea", summaryFieldWrapper)
+          : "";
 
-      return summaryValue.value + `${moduleDefaults.specialToken}` + ckEditorValue.innerHTML;
+      return (
+        summaryValue.value +
+        `${moduleDefaults.specialToken}` +
+        ckEditorValue.innerHTML
+      );
     } else {
       const ckEditorValue = getFirstBySelector("textarea", textFieldWrapper);
-      const summaryValue = summaryFieldWrapper !== null ? getFirstBySelector('textarea', summaryFieldWrapper) : "";
+      const summaryValue =
+        summaryFieldWrapper !== null
+          ? getFirstBySelector("textarea", summaryFieldWrapper)
+          : "";
 
-      return summaryValue.value + `${moduleDefaults.specialToken}` + ckEditorValue.value;
+      return (
+        summaryValue.value +
+        `${moduleDefaults.specialToken}` +
+        ckEditorValue.value
+      );
     }
   };
 
@@ -48,14 +70,18 @@ export default class DrupalFieldTypeController {
     let textWithSummary = getAllByClass(".form-textarea-wrapper", subfield);
     let textFieldWrapper = textWithSummary[0];
 
-    const hasCKEditorEnabled = getAllBySelector("div.ck", textFieldWrapper).length > 0;
+    const hasCKEditorEnabled =
+      getAllBySelector("div.ck", textFieldWrapper).length > 0;
 
     if (hasCKEditorEnabled) {
-      const ckEditorValue = getFirstBySelector('.ck .ck.ck-content', textFieldWrapper);
+      const ckEditorValue = getFirstBySelector(
+        ".ck .ck.ck-content",
+        textFieldWrapper,
+      );
 
       return ckEditorValue.innerHTML;
     } else {
-      const ckEditorValue = getFirstBySelector('textarea', textFieldWrapper);
+      const ckEditorValue = getFirstBySelector("textarea", textFieldWrapper);
 
       return ckEditorValue.value;
     }
@@ -84,14 +110,20 @@ export default class DrupalFieldTypeController {
       textFieldWrapper = textWithSummary[1];
     }
 
-    const hasCKEditorEnabled = getAllBySelector("div.ck", textFieldWrapper).length > 0;
+    const hasCKEditorEnabled =
+      getAllBySelector("div.ck", textFieldWrapper).length > 0;
 
     if (hasCKEditorEnabled) {
-      const summaryValue = summaryFieldWrapper ? getFirstBySelector('textarea', summaryFieldWrapper) : "";
+      const summaryValue = summaryFieldWrapper
+        ? getFirstBySelector("textarea", summaryFieldWrapper)
+        : "";
       let newValueSplit = newValue.split(`${moduleDefaults.specialToken}`);
 
       // use ckeditor instance to update the DOM
-      const editorElement = getFirstBySelector(".ck-editor__editable", textFieldWrapper);
+      const editorElement = getFirstBySelector(
+        ".ck-editor__editable",
+        textFieldWrapper,
+      );
       const editorInstance = editorElement.ckeditorInstance;
 
       if (textWithSummary.length === 1) {
@@ -105,8 +137,10 @@ export default class DrupalFieldTypeController {
         }
       }
     } else {
-      const ckEditorValue = getFirstBySelector('textarea', textFieldWrapper);
-      const summaryValue = summaryFieldWrapper ? getFirstBySelector('textarea', summaryFieldWrapper) : null;
+      const ckEditorValue = getFirstBySelector("textarea", textFieldWrapper);
+      const summaryValue = summaryFieldWrapper
+        ? getFirstBySelector("textarea", summaryFieldWrapper)
+        : null;
 
       let newValueSplit = newValue.split(`${moduleDefaults.specialToken}`);
 
@@ -124,18 +158,22 @@ export default class DrupalFieldTypeController {
     let textWithSummary = getAllByClass(".form-textarea-wrapper", subfield);
     let textFieldWrapper = textWithSummary[0];
 
-    const hasCKEditorEnabled = getAllBySelector("div.ck", textFieldWrapper).length > 0;
+    const hasCKEditorEnabled =
+      getAllBySelector("div.ck", textFieldWrapper).length > 0;
 
     if (hasCKEditorEnabled) {
       // use ckeditor instance to update the DOM
-      const editorElement = getFirstBySelector(".ck-editor__editable", textFieldWrapper);
+      const editorElement = getFirstBySelector(
+        ".ck-editor__editable",
+        textFieldWrapper,
+      );
       const editorInstance = editorElement.ckeditorInstance;
 
       if (editorInstance) {
         editorInstance.setData(String(newValue));
       }
     } else {
-      const ckEditorValue = getFirstBySelector('textarea', textFieldWrapper);
+      const ckEditorValue = getFirstBySelector("textarea", textFieldWrapper);
 
       ckEditorValue.value = String(newValue);
     }

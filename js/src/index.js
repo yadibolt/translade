@@ -5,18 +5,26 @@ import EventListenerController from "./Controllers/EventListenerController";
 
 (function (Drupal, once) {
   "use strict";
+
   Drupal.behaviors.translade = {
     attach: function (context, settings) {
-      once("translade", "body", context).forEach(function (element) {
-        let rendererController = new RendererController();
-
-        window.transladeConfig = new ConfigurationManager().initConfiguration();
-        new SessionManager().initSession();
-        rendererController.renderTopBar();
-        rendererController.renderActionsForFields();
-        new EventListenerController().addEventListeners();
+      once("translade", "body", context).forEach(function () {
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", initModuleScript);
+        } else {
+          initModuleScript();
+        }
       });
-    }
+    },
   };
 
+  const initModuleScript = () => {
+    let rendererController = new RendererController();
+
+    window.transladeConfig = new ConfigurationManager().initConfiguration();
+    new SessionManager().initSession();
+    rendererController.renderTopBar();
+    rendererController.renderActionsForFields();
+    new EventListenerController().addEventListeners();
+  };
 })(Drupal, once);

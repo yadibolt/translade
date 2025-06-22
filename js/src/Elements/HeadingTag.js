@@ -5,7 +5,12 @@ export default class HeadingTag {
   content = null;
 
   constructor(...attr) {
-    const { id = null, classNames = null, level = 1, content = null } = attr[0] || {};
+    const {
+      id = null,
+      classNames = null,
+      level = 1,
+      content = null,
+    } = attr[0] || {};
 
     this.id = id;
     this.classNames = classNames;

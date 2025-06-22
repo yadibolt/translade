@@ -12,15 +12,15 @@ export default class OptionTag {
   }
 
   getDefault() {
-    const optionTag = document.createElement('option');
+    const optionTag = document.createElement("option");
     if (this.value) {
-      optionTag.setAttribute('value', this.value);
+      optionTag.setAttribute("value", this.value);
     }
     if (this.name) {
       optionTag.innerHTML = this.name;
     }
     if (this.isSelected) {
-      optionTag.setAttribute('selected', 'selected');
+      optionTag.setAttribute("selected", "selected");
     }
 
     return optionTag;

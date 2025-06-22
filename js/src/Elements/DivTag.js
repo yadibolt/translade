@@ -4,7 +4,7 @@ export default class DivTag {
   content = null;
 
   constructor(...attr) {
-    const {id = null, classNames = null, content = null} = attr[0] || {};
+    const { id = null, classNames = null, content = null } = attr[0] || {};
 
     this.id = id;
     this.classNames = classNames;
@@ -17,7 +17,7 @@ export default class DivTag {
       divTag.id = this.id;
     }
     if (this.classNames) {
-      divTag.classList.add(...this.classNames)
+      divTag.classList.add(...this.classNames);
     }
     if (this.content) {
       divTag.innerHTML = this.content;

@@ -4,11 +4,10 @@ import SessionManager from "../Manager/SessionManager";
 import FieldHistoryController from "./FieldHistoryController";
 import DrupalFieldTypeController from "./DrupalFieldTypeController";
 
-import {getFirstBySelector, swapActiveClassName} from "../Util/HTMLUtil";
+import { getFirstBySelector, swapActiveClassName } from "../Util/HTMLUtil";
 
 export default class APIController {
-  constructor() {
-  }
+  constructor() {}
 
   translate(fieldId, mainField) {
     const config = window.transladeConfig;
@@ -16,7 +15,7 @@ export default class APIController {
     const drupalFieldTypeController = new DrupalFieldTypeController();
     const fieldHistoryController = new FieldHistoryController();
     const session = new SessionManager().getSession();
-    const historyRecord = fieldHistoryController.getLastHistoryRecord();
+    const historyRecord = fieldHistoryController.getLastHistoryRecord(fieldId);
 
     let actionBack = getFirstBySelector("a.back", mainField);
     let actionTranslate = getFirstBySelector("a.translate", mainField);
@@ -29,12 +28,12 @@ export default class APIController {
       trigger_id: String(fieldId),
       source_lang: String(config.contentLanguage),
       target_lang: String(session.selectedLangId),
-    }
+    };
 
     swapActiveClassName(
       [actionLoader],
       [actionBack, actionTranslate, actionRephrase],
-      'action-hide'
+      "action-hide",
     );
 
     return new Promise((resolve, reject) => {
@@ -44,7 +43,8 @@ export default class APIController {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
-      }).then((response) => response.json())
+      })
+        .then((response) => response.json())
         .then((data) => {
           if (
             !data.form_id ||
@@ -57,18 +57,21 @@ export default class APIController {
             swapActiveClassName(
               [actionBack, actionTranslate, actionRephrase],
               [actionLoader],
-              'action-hide'
+              "action-hide",
             );
             reject("Returned data do not follow the structure.");
           }
 
-          drupalFieldTypeController.setFieldData(data.trigger_id, data.translated_text);
+          drupalFieldTypeController.setFieldData(
+            data.trigger_id,
+            data.translated_text,
+          );
           fieldHistoryController.setHistoryData(fieldId);
 
           swapActiveClassName(
             [actionBack, actionTranslate, actionRephrase],
             [actionLoader],
-            'action-hide'
+            "action-hide",
           );
 
           resolve(data);
@@ -77,7 +80,7 @@ export default class APIController {
           swapActiveClassName(
             [actionBack, actionTranslate, actionRephrase],
             [actionLoader],
-            'action-hide',
+            "action-hide",
           );
           reject(e);
         });
@@ -89,7 +92,7 @@ export default class APIController {
 
     const drupalFieldTypeController = new DrupalFieldTypeController();
     const fieldHistoryController = new FieldHistoryController();
-    const historyRecord = fieldHistoryController.getLastHistoryRecord();
+    const historyRecord = fieldHistoryController.getLastHistoryRecord(fieldId);
 
     let actionBack = getFirstBySelector("a.back", mainField);
     let actionTranslate = getFirstBySelector("a.translate", mainField);
@@ -101,12 +104,12 @@ export default class APIController {
       text: String(historyRecord),
       trigger_id: String(fieldId),
       source_lang: String(config.contentLanguage),
-    }
+    };
 
     swapActiveClassName(
       [actionLoader],
       [actionBack, actionTranslate, actionRephrase],
-      'action-hide'
+      "action-hide",
     );
 
     return new Promise((resolve, reject) => {
@@ -116,7 +119,8 @@ export default class APIController {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
-      }).then((response) => response.json())
+      })
+        .then((response) => response.json())
         .then((data) => {
           if (
             !data.form_id ||
@@ -128,18 +132,21 @@ export default class APIController {
             swapActiveClassName(
               [actionLoader],
               [actionBack, actionTranslate, actionRephrase],
-              'action-hide'
+              "action-hide",
             );
             reject("Returned data do not follow the structure.");
           }
 
-          drupalFieldTypeController.setFieldData(data.trigger_id, data.rephrased_text);
+          drupalFieldTypeController.setFieldData(
+            data.trigger_id,
+            data.rephrased_text,
+          );
           fieldHistoryController.setHistoryData(fieldId);
 
           swapActiveClassName(
             [actionBack, actionTranslate, actionRephrase],
             [actionLoader],
-            'action-hide'
+            "action-hide",
           );
 
           resolve(data);
@@ -148,7 +155,7 @@ export default class APIController {
           swapActiveClassName(
             [actionBack, actionTranslate, actionRephrase],
             [actionLoader],
-            'action-hide'
+            "action-hide",
           );
           reject(e);
         });

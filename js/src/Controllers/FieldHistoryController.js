@@ -1,15 +1,14 @@
 import DrupalFieldTypeController from "./DrupalFieldTypeController";
 import moduleDefault from "../Defaults/ModuleDefault";
 import moduleDefaults from "../Defaults/ModuleDefault";
-import {getFirstByClass} from "../Util/HTMLUtil";
+import { getFirstByClass } from "../Util/HTMLUtil";
 
 export default class FieldHistoryController {
-  constructor() {
-  }
+  constructor() {}
 
   setHistoryData = (fieldId) => {
     const drupalFieldTypeController = new DrupalFieldTypeController();
-    const history = window.transladeConfig.history;
+    let hist = window.transladeConfig.history;
     // get the item that has fieldId className, it contains the type of field
     const subfield = getFirstByClass(fieldId);
 
@@ -41,31 +40,35 @@ export default class FieldHistoryController {
         break;
     }
 
-    console.log(input);
-
-    if (!history[fieldId] || history[fieldId] === undefined) {
-      history[fieldId.toString()] = [input];
+    if (!hist[fieldId] || hist[fieldId] === undefined) {
+      hist[fieldId.toString()] = [input];
     } else {
-      if (history[fieldId.toString()].length >= moduleDefaults.maximumHistoryLength) {
-        history[fieldId.toString()].shift();
+      if (
+        hist[fieldId.toString()].length >= moduleDefaults.maximumHistoryLength
+      ) {
+        hist[fieldId.toString()].shift();
       }
-      history[fieldId.toString()].push(input);
+      hist[fieldId.toString()].push(input);
     }
-    window.transladeConfig.history = history;
-  }
+
+    window.transladeConfig.history = hist;
+  };
 
   getLastHistoryRecord = (fieldId) => {
-    const history = window.transladeConfig.history;
+    let hist = window.transladeConfig.history;
 
-    if (!history) return null;
-    if (!history[fieldId] || history[fieldId] === undefined) return null;
+    console.log(fieldId);
+    console.log("history", hist);
 
-    return history[fieldId][history[fieldId].length - 1];
-  }
+    if (!hist) return null;
+    if (!hist[fieldId] || hist[fieldId] === undefined) return null;
+
+    return hist[fieldId][hist[fieldId].length - 1];
+  };
 
   restoreFromHistory = (fieldId) => {
     const drupalFieldTypeController = new DrupalFieldTypeController();
-    const hist = window.transladeConfig.history;
+    let hist = window.transladeConfig.history;
 
     if (!hist) return;
     if (!hist[fieldId] || hist[fieldId] === undefined) return;
@@ -76,7 +79,10 @@ export default class FieldHistoryController {
 
     if (hist[fieldId][hist[fieldId].length - 1]) {
       window.transladeConfig.history = hist;
-      drupalFieldTypeController.setFieldData(fieldId, hist[fieldId][hist[fieldId].length - 1]);
+      drupalFieldTypeController.setFieldData(
+        fieldId,
+        hist[fieldId][hist[fieldId].length - 1],
+      );
     }
-  }
+  };
 }
