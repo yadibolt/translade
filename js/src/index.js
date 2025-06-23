@@ -22,8 +22,9 @@ import EventListenerController from "./Controllers/EventListenerController";
     let rendererController = new RendererController();
 
     window.transladeConfig = new ConfigurationManager().initConfiguration();
+    window.transladeInputControl = { suspend: false };
+
     new SessionManager().initSession();
-    // rendererController.renderTopBar();
     rendererController.renderActionsForFields();
     new EventListenerController().addEventListeners();
   };

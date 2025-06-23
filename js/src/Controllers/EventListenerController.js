@@ -53,7 +53,7 @@ export default class EventListenerController {
       actionTranslate.addEventListener("click", (event) => {
         event.preventDefault();
 
-        return new APIController().translate(fieldId, field);
+        new APIController().translate(fieldId, field);
       });
     });
   }
