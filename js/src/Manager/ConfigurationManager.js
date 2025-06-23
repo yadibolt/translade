@@ -34,6 +34,7 @@ export default class ConfigurationManager {
       return {
         languages: String(parsedConfiguration.languages).trim().split(","),
         contentLanguage: String(parsedConfiguration.content_language).trim(),
+        darkTheme: Boolean(parsedConfiguration.dark_theme),
         contentAIActions: contentAIActions,
         formId: String(parsedConfiguration.form_id),
         history: {},

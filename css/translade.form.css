@@ -153,6 +153,29 @@ label.translade-label {
 }
 
 /* Color options */
+/* Dark mode */
+.translade-actions-wrapper.dark {
+  border-color: #373737;
+  background-color: #141414;
+}
+
+.translade-actions-wrapper.dark .translade-label {
+  color: #a1a1a1;
+  background-color: #141414;
+}
+
+.translade-actions-wrapper.dark select.translade-languageTo,
+.translade-actions-wrapper.dark select.translade-contentAIAction {
+  color: #a1a1a1;
+  background-color: #141414;
+  border-color: #373737;
+}
+
+.translade-actions-wrapper.dark a.translade-action-trigger:hover {
+  background-color: #1c1c1c;
+}
+
+/* Light mode */
 .translade-actions-wrapper.light {
   border-color: #e5e5e5;
   background-color: #ffffff;
@@ -164,7 +187,7 @@ label.translade-label {
 }
 
 .translade-actions-wrapper.light select.translade-languageTo,
-select.translade-contentAIAction {
+.translade-actions-wrapper.light select.translade-contentAIAction {
   color: #808080;
   background-color: #fff;
   border-color: #e5e5e5;

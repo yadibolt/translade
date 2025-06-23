@@ -82,6 +82,27 @@ export default class EventListenerController {
           case "rewriteRephrase":
             new APIController().rephrase(fieldId, field);
             break;
+          case "checkGrammar":
+            new APIController().checkGrammar(fieldId, field);
+            break;
+          case "summarize":
+            new APIController().summarize(fieldId, field);
+            break;
+          case "expansionElaboration":
+            new APIController().expandContent(fieldId, field);
+            break;
+          case "shortenCondense":
+            new APIController().shortenContent(fieldId, field);
+            break;
+          case "changeToneProfessional":
+            new APIController().changeToneProfessional(fieldId, field);
+            break;
+          case "changeToneCasual":
+            new APIController().changeToneCasual(fieldId, field);
+            break;
+          case "simplify":
+            new APIController().simplifyContent(fieldId, field);
+            break;
           case "default":
             return;
         }

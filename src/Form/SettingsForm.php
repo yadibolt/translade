@@ -123,6 +123,21 @@ class SettingsForm extends ConfigFormBase {
       '#weight' => $weight++,
     ];
 
+    $form['theme_options'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Theme Options'),
+      '#open' => TRUE,
+      '#weight' => $weight++,
+    ];
+
+    $form['theme_options']['theme_dark'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable Dark Mode'),
+      '#description' => $this->t('Enable dark theme for Translade fields.'),
+      '#default_value' => $config->get('theme_dark') ?: FALSE,
+      '#weight' => $weight++,
+    ];
+
     $form['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Save Configuration'),
@@ -171,7 +186,7 @@ class SettingsForm extends ConfigFormBase {
 
     if ($prepared_ai_actions != $ai_actions_defaults) {
       $this->config('translade.settings')
-        ->set('content_types', $ai_actions)
+        ->set('content_ai_actions', $ai_actions)
         ->save();
 
       \Drupal::messenger()->addStatus($this->t('AI Actions have been updated.'));
@@ -181,7 +196,7 @@ class SettingsForm extends ConfigFormBase {
     if (!empty($model)) {
       if ($model !== $this->config('translade.settings')->get('openai_model')) {
         $this->config('translade.settings')
-            ->set('model', $model)
+            ->set('openai_model', $model)
             ->save();
         \Drupal::messenger()->addStatus($this->t('OpenAI model has been set to @model.', ['@model' => $model]));
       }
@@ -193,6 +208,14 @@ class SettingsForm extends ConfigFormBase {
         ->set('languages', str_replace(' ', '', $languages))
         ->save();
       \Drupal::messenger()->addStatus($this->t('Languages have been updated.'));
+    }
+
+    $theme_dark = $form_state->getValue('theme_dark');
+    if ($theme_dark !== $this->config('translade.settings')->get('theme_dark')) {
+      $this->config('translade.settings')
+        ->set('theme_dark', $theme_dark)
+        ->save();
+      \Drupal::messenger()->addStatus($this->t('Theme has been updated.'));
     }
   }
 

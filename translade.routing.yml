@@ -17,7 +17,7 @@ translade.providers:
 translade.api.translate:
   path: "/api/translade/translate"
   defaults:
-    _title: "Translade API"
+    _title: "Translade API - Translate"
     _controller: '\Drupal\translade\Controller\APIController::translate'
   requirements:
     _permission: "administer translade"
@@ -28,10 +28,87 @@ translade.api.translate:
 translade.api.rephrase:
   path: "/api/translade/rephrase"
   defaults:
-    _title: "Translade API"
+    _title: "Translade API - Rephrase"
     _controller: '\Drupal\translade\Controller\APIController::rephrase'
   requirements:
     _permission: "administer translade"
+  methods: [POST]
+  options:
+    no_cache: TRUE
+
+translade.api.checkGrammar:
+  path: "/api/translade/check-grammar"
+  defaults:
+    _title: "Translade API - Check Grammar"
+    _controller: '\Drupal\translade\Controller\APIController::checkGrammar'
+  requirements:
+    _permission:  "administer translade"
+  methods: [POST]
+  options:
+    no_cache: TRUE
+
+translade.api.summarize:
+  path: "/api/translade/summarize"
+  defaults:
+    _title: "Translade API - Summarize"
+    _controller: '\Drupal\translade\Controller\APIController::summarize'
+  requirements:
+    _permission:  "administer translade"
+  methods: [POST]
+  options:
+    no_cache: TRUE
+
+translade.api.expandContent:
+  path: "/api/translade/expand-content"
+  defaults:
+    _title: "Translade API - Expand Content"
+    _controller: '\Drupal\translade\Controller\APIController::expandContent'
+  requirements:
+    _permission:  "administer translade"
+  methods: [POST]
+  options:
+    no_cache: TRUE
+
+translade.api.shortenContent:
+  path: "/api/translade/shorten-content"
+  defaults:
+    _title: "Translade API - Shorten Content"
+    _controller: '\Drupal\translade\Controller\APIController::shortenContent'
+  requirements:
+    _permission:  "administer translade"
+  methods: [POST]
+  options:
+    no_cache: TRUE
+
+translade.api.changeToneProfessional:
+  path: "/api/translade/change-tone-professional"
+  defaults:
+    _title: "Translade API - Change Tone Professional"
+    _controller: '\Drupal\translade\Controller\APIController::changeToneProfessional'
+  requirements:
+    _permission:  "administer translade"
+  methods: [POST]
+  options:
+    no_cache: TRUE
+
+translade.api.changeToneCasual:
+  path: "/api/translade/change-tone-casual"
+  defaults:
+    _title: "Translade API - Change Tone Casual"
+    _controller: '\Drupal\translade\Controller\APIController::changeToneCasual'
+  requirements:
+    _permission:  "administer translade"
+  methods: [POST]
+  options:
+    no_cache: TRUE
+
+translade.api.simplify:
+  path: "/api/translade/simplify-content"
+  defaults:
+    _title: "Translade API - Simplify Content"
+    _controller: '\Drupal\translade\Controller\APIController::simplifyContent'
+  requirements:
+    _permission:  "administer translade"
   methods: [POST]
   options:
     no_cache: TRUE

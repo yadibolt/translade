@@ -13,6 +13,7 @@ export default class ActionsController {
   constructor() {}
 
   createActionsForField(fieldId) {
+    const themeClassName = window.transladeConfig.darkTheme ? "dark" : "light";
     let languageOptions = [];
     let contentAIActions = [];
 
@@ -49,7 +50,7 @@ export default class ActionsController {
     });
 
     const wrapper = new DivTag({
-      classNames: ["translade-actions-wrapper", "light"], // THEME: dark or light
+      classNames: ["translade-actions-wrapper", themeClassName],
     }).getDefault();
     const backIcon = new ImageTag({
       src: `${moduleDefaults.assetsFolder}/icons/back.svg`,

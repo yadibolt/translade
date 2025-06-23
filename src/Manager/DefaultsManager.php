@@ -15,7 +15,7 @@ class DefaultsManager extends ConfigBase {
       "summarize" => "Summarize",
       "expansionElaboration" => "Expansion/Elaboration",
       "shortenCondense" => "Shorten/Condense",
-      "changeToneProffessional" => "Change Tone (Professional)",
+      "changeToneProfessional" => "Change Tone (Professional)",
       "changeToneCasual" => "Change Tone (Casual)",
       "simplify" => "Simplify",
     ];
