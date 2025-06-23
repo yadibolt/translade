@@ -11,12 +11,8 @@ class APIController extends ControllerBase {
 
   public function __construct() {}
 
-  /**
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   * @return \Symfony\Component\HttpFoundation\JsonResponse
-   */
-  public function translate(Request $request) {
-    $OpenAI_connector = new OpenAIConnector();
+  public function translate(Request $request): JsonResponse {
+    $openai_connector = new OpenAIConnector();
     $prompt_manager = new PromptManager();
 
     $content = json_decode($request->getContent(), TRUE);
@@ -38,25 +34,21 @@ class APIController extends ControllerBase {
       '@target_lang' => $target_lang,
     ]);
 
-    $response = $OpenAI_connector->executeRequest(
-      $OpenAI_connector->makeConnection(),
-      'POST',
-      [
-        'model' => $OpenAI_connector->getModel(),
-        'temperature' => 0,
-        'messages' => [
-          [
-            'role' => 'system',
-            'content' => $prompt,
-          ],
-          [
-            'role' => 'user',
-            'content' => $text,
-          ],
-        ]
-      ],
-      'chat/completions'
-    );
+    $data = [
+      'model' => $openai_connector->getDefaultModel(),
+      'temperature' => 0,
+      'messages' => [
+        [
+          'role' => 'system',
+          'content' => $prompt,
+        ],
+        [
+          'role' => 'user',
+          'content' => $text,
+        ],
+      ]
+    ];
+    $response = $openai_connector->makeRequest('chat/completions', 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
@@ -77,12 +69,8 @@ class APIController extends ControllerBase {
     ], 200);
   }
 
-  /**
-   * @param Request $request
-   * @return JsonResponse
-   */
   public function rephrase(Request $request): JsonResponse {
-    $OpenAI_connector = new OpenAIConnector();
+    $openai_connector = new OpenAIConnector();
     $prompt_manager = new PromptManager();
 
     $content = json_decode($request->getContent(), TRUE);
@@ -98,29 +86,23 @@ class APIController extends ControllerBase {
       return new JsonResponse(['error' => 'Missing required parameters'], 400);
     }
 
-    $prompt = $prompt_manager->getRephrasePrompt([
-      '@source_lang' => $source_lang,
-    ]);
+    $prompt = $prompt_manager->getRephrasePrompt();
 
-    $response = $OpenAI_connector->executeRequest(
-      $OpenAI_connector->makeConnection(),
-      'POST',
-      [
-        'model' => $OpenAI_connector->getModel(),
-        'temperature' => 0,
-        'messages' => [
-          [
-            'role' => 'system',
-            'content' => $prompt,
-          ],
-          [
-            'role' => 'user',
-            'content' => $text,
-          ],
-        ]
-      ],
-      'chat/completions'
-    );
+    $data = [
+      'model' => $openai_connector->getDefaultModel(),
+      'temperature' => 0,
+      'messages' => [
+        [
+          'role' => 'system',
+          'content' => $prompt,
+        ],
+        [
+          'role' => 'user',
+          'content' => $text,
+        ],
+      ]
+    ];
+    $response = $openai_connector->makeRequest('chat/completions', 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 

@@ -1,9 +1,9 @@
 translade.configure:
   route_name: translade.configure
-  title: "Configure Translade"
+  title: "Translade Configuration"
   base_route: translade.configure
 
 translade.providers:
     route_name: translade.providers
-    title: "Providers"
+    title: "Translade Providers"
     base_route: translade.providers

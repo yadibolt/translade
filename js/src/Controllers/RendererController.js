@@ -4,7 +4,7 @@ import ParagraphTag from "../Elements/ParagraphTag";
 import FieldsController from "./FieldsController";
 import ActionsController from "./ActionsController";
 
-import { getById } from "../Util/HTMLUtil";
+import {getById, getFirstByClass} from "../Util/HTMLUtil";
 import FieldHistoryController from "./FieldHistoryController";
 
 export default class RendererController {
@@ -42,9 +42,11 @@ export default class RendererController {
         "translade-field-",
       );
 
-      const actions = actionsController.createActionsForField(fieldId);
-      field.appendChild(actions);
-      fieldHistoryController.setHistoryData(fieldId);
+      if (getFirstByClass(fieldId)) {
+        const actions = actionsController.createActionsForField(fieldId);
+        field.appendChild(actions);
+        fieldHistoryController.setHistoryData(fieldId);
+      }
     });
   }
 }

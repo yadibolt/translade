@@ -5,7 +5,7 @@ translade.configure:
   parent: system.admin_config_system
 
 translade.providers:
-  title: Translade
+  title: Translade Providers
   description: "Configure Translade AI Providers"
   route_name: translade.providers
   parent: system.admin_config_system

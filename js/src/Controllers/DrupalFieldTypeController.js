@@ -182,6 +182,8 @@ export default class DrupalFieldTypeController {
   setFieldData = (fieldId, newValue) => {
     const subfield = getFirstByClass(fieldId);
 
+    if (!subfield) return;
+
     const fieldTypeFull = Array.from(subfield.classList).find((className) =>
       className.startsWith("translade-type-"),
     );

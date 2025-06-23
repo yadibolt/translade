@@ -5,93 +5,67 @@ namespace Drupal\translade\Connector;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class OpenAIConnector {
 
   public function __construct() {}
 
-  public function makeConnection(): bool|Client {
+  public function makeRequest(string $endpoint, string $method = 'GET', array $data = []): mixed {
     $config = \Drupal::config('translade.settings');
-    $api_key = $config->get('api_key');
+    $api_key = $config->get('openai_api_key');
 
-    if (empty($api_key)) {
-      \Drupal::logger('translade')->error('API key is not set in the configuration. Please set it in the Translade settings.');
-      return false;
+    if (!$api_key) {
+      \Drupal::logger('translade')->error('OpenAI API key is not set in the configuration. Please set it in the Translade settings.');
+      return new JsonResponse("Requested resource needs valid API key.", 400);
     }
 
-    return new Client([
+    $options = [];
+    $client = new Client([
       'base_uri' => 'https://api.openai.com/v1/',
       'headers' => [
         'Authorization' => 'Bearer ' . trim($api_key),
         'Content-Type' => 'application/json',
+        'Accept' => 'application/json',
       ],
       'verify' => true,
       'http_errors' => true,
     ]);
-  }
+    if ($method === 'POST' && !empty($data)) {
+      $options['json'] = $data;
+    }
 
-
-  public function executeRequest(Client $connection, string $method = 'GET', array $data = [], $endpoint = "models"): bool|array {
     try {
-      $options = [
-        'headers' => [
-          'Accept' => 'application/json',
-        ],
-      ];
-
-      if ($method !== 'GET' && !empty($data)) {
-        $options['json'] = $data;
-      }
-
-      $request_response = $connection->request($method, $endpoint, $options);
-      $response_body = (string) $request_response->getBody();
+      $response = $client->request($method, $endpoint, $options);
+      $response_body = (string) $response->getBody();
 
       return json_decode($response_body, true);
     } catch (RequestException $e) {
-      \Drupal::logger('translade')->error('OpenAI API request failed: @message', [
-        '@message' => $e->getMessage()
-      ]);
-
-      return false;
+      \Drupal::logger('translade')->error("Requested resource ran into an exception: " . serialize($e));
     } catch (GuzzleException $e) {
-      \Drupal::logger('translade')->error('OpenAI API request failed: @message', [
-        '@message' => $e->getMessage()
-      ]);
-
-      return false;
+      \Drupal::logger('translade')->error("Requested resource ran into Guzzle exception: " . serialize($e));
     }
+
+    return false;
   }
 
-  /**
-   * @return string
-   */
-  public function getModel(): string {
-    $config = \Drupal::config('translade.settings');
-    $model = $config->get('model');
-    if (empty($model)) {
-      return 'gpt-4o-mini';
-    }
-    return $model;
-  }
+  public function getOpenAIModels(): bool|array {
+    $response = $this->makeRequest('models', 'GET');
 
-  /**
-   * @return bool|array
-   */
-  public function getAvailableModels(): bool|array {
-    $openai_connection = $this->makeConnection();
-
-    if (!$openai_connection) {
-      \Drupal::logger('translade')->error('Failed to create OpenAI connection. Please check your API key.');
-
-      return false;
-    }
-
-    $response = $this->executeRequest($openai_connection, 'GET', []);
     if (isset($response['data']) && is_array($response['data'])) {
       return $response['data'];
     } else {
       \Drupal::logger('translade')->error('Failed to fetch available models from OpenAI API.');
       return false;
     }
+  }
+
+  public function getDefaultModel(): string {
+    $config = \Drupal::config('translade.settings');
+    $model = $config->get('openai_model');
+    if (empty($model)) {
+      return 'gpt-4o-mini';
+    }
+    return $model;
   }
 }

@@ -5,10 +5,10 @@ namespace Drupal\translade\Manager;
 use Drupal\Core\Config\ConfigBase;
 
 class DefaultsManager extends ConfigBase {
-  
+
   public function __construct() {}
 
-  public function getAvailableContentAIActions() {
+  public function getAIActions(): array {
     return [
       "rewriteRephrase" => "Rewrite/Rephrase",
       "checkGrammar" => "Check Grammar",
@@ -21,17 +21,13 @@ class DefaultsManager extends ConfigBase {
     ];
   }
 
-    /**
-     * @return string[]
-     */
-  function getSupportedFieldTypes(): array {
-        // supported types
-        return [
-            'string',
-            'string_long',
-            'text',
-            'text_long',
-            'text_with_summary',
-        ];
-    }
+  public function getSupportedFieldTypes(): array {
+    return [
+      'string',
+      'string_long',
+      'text',
+      'text_long',
+      'text_with_summary',
+    ];
+  }
 }

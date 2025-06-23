@@ -1,5 +1,7 @@
 import ExceptionManager from "../Manager/ExceptionManager";
 
+const silenceExceptions = true;
+
 const getById = (id) => {
   const element = document.getElementById(id);
   return element
@@ -8,6 +10,7 @@ const getById = (id) => {
         `Element with ID "${id}" not found.`,
         null,
         null,
+        silenceExceptions
       );
 };
 
@@ -19,6 +22,7 @@ const getAllByClass = (className, root = null) => {
         `No elements found with class "${className}".`,
         null,
         null,
+        silenceExceptions
       );
     }
     return elements;
@@ -29,6 +33,7 @@ const getAllByClass = (className, root = null) => {
         `No elements found with class "${className}".`,
         null,
         null,
+        silenceExceptions
       );
     }
     return elements;
@@ -43,6 +48,7 @@ const getFirstByClass = (className) => {
         `First element with class "${className}" not found.`,
         null,
         null,
+      silenceExceptions
       );
 };
 
@@ -55,6 +61,7 @@ const getFirstBySelector = (selector, root = null) => {
           `Element with selector "${selector}" not found in the provided root.`,
           null,
           null,
+          silenceExceptions
         );
   } else {
     const element = document.querySelectorAll(selector)[0];
@@ -64,6 +71,7 @@ const getFirstBySelector = (selector, root = null) => {
           `Element with selector "${selector}" not found.`,
           null,
           null,
+          silenceExceptions
         );
   }
 };
@@ -77,6 +85,7 @@ const getAllBySelector = (selector, root = null) => {
           `Element with selector "${selector}" not found in the provided root.`,
           null,
           null,
+          silenceExceptions
         );
   } else {
     const elements = document.querySelectorAll(selector);
@@ -86,6 +95,7 @@ const getAllBySelector = (selector, root = null) => {
           `Element with selector "${selector}" not found.`,
           null,
           null,
+          silenceExceptions
         );
   }
 };

@@ -1,5 +1,4 @@
 import DrupalFieldTypeController from "./DrupalFieldTypeController";
-import moduleDefault from "../Defaults/ModuleDefault";
 import moduleDefaults from "../Defaults/ModuleDefault";
 import { getFirstByClass } from "../Util/HTMLUtil";
 

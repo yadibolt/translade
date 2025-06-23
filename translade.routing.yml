@@ -6,6 +6,14 @@ translade.configure:
   requirements:
     _permission: "administer translade"
 
+translade.providers:
+  path: "/admin/config/system/translade/providers"
+  defaults:
+    _title: "Translade Providers"
+    _form: '\Drupal\translade\Form\ProviderForm'
+  requirements:
+    _permission: "administer translade"
+
 translade.api.translate:
   path: "/api/translade/translate"
   defaults:

@@ -1,18 +1,29 @@
-.translade-apikey-success {
-  background-color: rgba(125, 255, 125, 0.5);
-  border: 1px solid rgba(25, 255, 25, 1);
-  padding: 0.75rem 1.25rem;
-  font-size: 0.9rem;
+.translade-success {
+  display: flex;
+  align-items: center;
+  background-color: oklch(93.8% 0.127 124.321);
+  padding: 0.5rem 1.25rem;
+  color: #141414;
+  font-size: 0.75rem;
+  box-shadow: none;
+  border: 1px solid oklch(84.1% 0.238 128.85);
+  height: 34.5px;
+  border-radius: 0.5rem;
 }
 
-.translade-apikey-success span {
+.translade-success span {
   font-weight: bold;
 }
 
-.translade-apikey-error {
-  background-color: rgba(255, 125, 125, 0.5);
-  border: 1px solid rgba(255, 25, 25, 1);
-  padding: 0.75rem 1.25rem;
-  font-weight: bold;
-  font-size: 0.9rem;
+.translade-error {
+  display: flex;
+  align-items: center;
+  background-color: oklch(88.5% 0.062 18.334);
+  padding: 0.5rem 1.25rem;
+  color: #141414;
+  font-size: 0.75rem;
+  box-shadow: none;
+  border: 1px solid oklch(70.4% 0.191 22.216);
+  height: 34.5px;
+  border-radius: 0.5rem;
 }

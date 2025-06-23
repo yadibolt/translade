@@ -16,7 +16,7 @@ function translade_form_alter(&$form, FormStateInterface $form_state, $form_id):
     $content_types = $config->get('content_types') ?: [];
     $content_ai_actions = $config->get('content_ai_actions') ?: [];
     $defaults_manager = new DefaultsManager();
-    $all_ai_actions = $defaults_manager->getAvailableContentAIActions();
+    $all_ai_actions = $defaults_manager->getAIActions();
 
     $form_shorthand_type = "node_";
     if (str_contains($form_id, 'commerce_product')) $form_shorthand_type = "commerce_product_";
