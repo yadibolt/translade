@@ -3,9 +3,9 @@ import HeadingTag from "../Elements/HeadingTag";
 import ParagraphTag from "../Elements/ParagraphTag";
 import FieldsController from "./FieldsController";
 import ActionsController from "./ActionsController";
+import FieldHistoryController from "./FieldHistoryController";
 
 import {getById, getFirstByClass} from "../Util/HTMLUtil";
-import FieldHistoryController from "./FieldHistoryController";
 
 export default class RendererController {
   constructor() {}

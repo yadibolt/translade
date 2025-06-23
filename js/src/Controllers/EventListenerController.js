@@ -1,9 +1,11 @@
-import { getAllByClass, getById, getFirstBySelector } from "../Util/HTMLUtil";
+import moduleDefaults from "../Defaults/ModuleDefault";
+
 import FieldsController from "./FieldsController";
 import APIController from "./APIController";
 import FieldHistoryController from "./FieldHistoryController";
 import SessionManager from "../Manager/SessionManager";
-import moduleDefaults from "../Defaults/ModuleDefault";
+
+import { getAllByClass, getFirstBySelector } from "../Util/HTMLUtil";
 
 export default class EventListenerController {
   constructor() {}

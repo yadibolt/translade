@@ -1,7 +1,6 @@
 import moduleDefaults from "../Defaults/ModuleDefault";
 
 import SessionManager from "../Manager/SessionManager";
-
 import DivTag from "../Elements/DivTag";
 import ImageTag from "../Elements/ImageTag";
 import SpanTag from "../Elements/SpanTag";
