@@ -4,7 +4,7 @@ import SessionManager from "../Manager/SessionManager";
 import FieldHistoryController from "./FieldHistoryController";
 import DrupalFieldTypeController from "./DrupalFieldTypeController";
 
-import { getFirstBySelector, swapActiveClassName } from "../Util/HTMLUtil";
+import { getFirstBySelector, swapActiveClassName } from "../Util/DocumentUtil";
 
 export default class APIController {
   constructor() {}

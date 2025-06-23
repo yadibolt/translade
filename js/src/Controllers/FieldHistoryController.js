@@ -2,7 +2,7 @@ import moduleDefaults from "../Defaults/ModuleDefault";
 
 import DrupalFieldTypeController from "./DrupalFieldTypeController";
 
-import { getFirstByClass } from "../Util/HTMLUtil";
+import { getFirstByClass } from "../Util/DocumentUtil";
 
 export default class FieldHistoryController {
   constructor() {}

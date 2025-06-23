@@ -5,7 +5,7 @@ import APIController from "./APIController";
 import FieldHistoryController from "./FieldHistoryController";
 import SessionManager from "../Manager/SessionManager";
 
-import { getAllByClass, getFirstBySelector } from "../Util/HTMLUtil";
+import { getAllByClass, getFirstBySelector } from "../Util/DocumentUtil";
 
 export default class EventListenerController {
   constructor() {}

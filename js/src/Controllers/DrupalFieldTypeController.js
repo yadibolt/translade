@@ -5,7 +5,7 @@ import {
   getAllByClass,
   getAllBySelector,
   getFirstByClass,
-} from "../Util/HTMLUtil";
+} from "../Util/DocumentUtil";
 
 export default class DrupalFieldTypeController {
   constructor() {}

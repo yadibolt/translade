@@ -1,6 +1,6 @@
 import ExceptionManager from "./ExceptionManager";
 
-import { getById } from "../Util/HTMLUtil";
+import { getById } from "../Util/DocumentUtil";
 
 export default class ConfigurationManager {
   constructor() {}

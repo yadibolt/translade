@@ -5,7 +5,7 @@ import FieldsController from "./FieldsController";
 import ActionsController from "./ActionsController";
 import FieldHistoryController from "./FieldHistoryController";
 
-import {getById, getFirstByClass} from "../Util/HTMLUtil";
+import {getById, getFirstByClass} from "../Util/DocumentUtil";
 
 export default class RendererController {
   constructor() {}
