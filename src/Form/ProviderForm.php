@@ -110,15 +110,17 @@ class ProviderForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state): void {
-    if (!empty($form_state->getValue('openai_api_key'))) {
-      if (trim($form_state->getValue('openai_api_key')) != 'clear'
-      && strlen($form_state->getValue('openai_api_key')) <= 10) {
+    $openai_api_key = $form_state->getValue('openai_api_key');
+    if (!empty($openai_api_key)) {
+      if (trim($openai_api_key) != 'clear'
+      && strlen($openai_api_key) <= 10) {
         $form_state->setErrorByName('openai_api_key', $this->t('Check your OpenAI API key. The value does not seem to be valid.'));
       }
     }
-    if (!empty($form_state->getValue('google_api_key'))) {
-      if (trim($form_state->getValue('google_api_key')) != 'clear'
-        && strlen($form_state->getValue('google_api_key')) <= 10) {
+    $google_api_key = $form_state->getValue('google_api_key');
+    if (!empty($google_api_key)) {
+      if (trim($google_api_key) != 'clear'
+        && strlen($google_api_key) <= 10) {
         $form_state->setErrorByName('google_api_key', $this->t('Check your OpenAI API key. The value does not seem to be valid.'));
       }
     }
