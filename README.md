@@ -36,12 +36,6 @@
 7. That's it! You are now able to swiftly translate and modify the text based content!
 8. (Optional) Create `/locales/your-language-id.json` files for UI translation. (Supports only **valid Drupal Language ids**)
 
-## Coming Soon
-
-- Google Translate provider
-- Field-level rollback
-- Batch translation operations
-
 ## Requirements
 
 - Drupal 10 or 11
