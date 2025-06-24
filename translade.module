@@ -3,10 +3,18 @@
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\translade\Manager\DefaultsManager;
+use Drupal\translade\Manager\ProviderManager;
 
 
 function translade_form_alter(&$form, FormStateInterface $form_state, $form_id): void {
   $defaults_manager = new DefaultsManager();
+  $provider_manager = new ProviderManager();
+  $api_key_exists = $provider_manager->checkAnyAPIKeyExists();
+  $provider_exists = $provider_manager->checkSelectedProvider();
+
+  if (!$api_key_exists || !$provider_exists) {
+    return;
+  }
 
   $weight = 0;
 

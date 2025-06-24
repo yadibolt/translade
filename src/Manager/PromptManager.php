@@ -2,8 +2,7 @@
 
 namespace Drupal\translade\Manager;
 
-class PromptManager
-{
+class PromptManager {
   public function __construct() {}
 
   public function getTranslationPrompt(array $tokens = []): string {

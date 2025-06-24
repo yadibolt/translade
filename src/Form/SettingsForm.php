@@ -7,6 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\translade\Connector\OpenAIConnector;
 use Drupal\commerce_product\Entity\ProductVariationType;
 use Drupal\translade\Manager\DefaultsManager;
+use Drupal\translade\Manager\ProviderManager;
 
 class SettingsForm extends ConfigFormBase {
   /**
@@ -33,8 +34,9 @@ class SettingsForm extends ConfigFormBase {
     $config = \Drupal::config('translade.settings') ?: [];
     $provider_form_url = \Drupal::urlGenerator()->generateFromRoute('translade.providers');
     $openai_connector = new OpenAIConnector();
-    $api_key_exists = $this->checkAPIKeyExists();
-    $provider_exists = $this->checkSelectedProvider();
+    $provider_manager = new ProviderManager();
+    $api_key_exists = $provider_manager->checkAnyAPIKeyExists();
+    $provider_exists = $provider_manager->checkSelectedProvider();
 
     $form['messages'] = [
       '#type' => 'markup',
@@ -241,18 +243,6 @@ class SettingsForm extends ConfigFormBase {
         ->save();
       \Drupal::messenger()->addStatus($this->t('Theme has been updated.'));
     }
-  }
-
-  public function checkAPIKeyExists(): bool {
-    $config = \Drupal::config('translade.settings');
-    return !empty($config->get('openai_api_key')) || !empty($config->get('google_api_key'));
-  }
-
-  public function checkSelectedProvider(): bool {
-    $config = \Drupal::config('translade.settings');
-    $provider_name = $config->get('provider_name') ?: 'openai';
-
-    return !empty($config->get($provider_name . '_api_key'));
   }
 
   public function getAvailableContentTypes(): array {
