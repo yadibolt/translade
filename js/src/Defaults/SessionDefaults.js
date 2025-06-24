@@ -1,7 +1,7 @@
-import moduleDefaults from "./ModuleDefault";
+import moduleDefaults from "./ModuleDefaults";
 
-const sessionDefault = {
+const sessionDefaults = {
   selectedLangId: moduleDefaults.selectedLangIdDefault,
 };
 
-export default sessionDefault;
+export default sessionDefaults;

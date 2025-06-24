@@ -1,5 +1,5 @@
-import moduleDefaults from "../Defaults/ModuleDefault";
-import sessionDefault from "../Defaults/SessionDefault";
+import moduleDefaults from "../Defaults/ModuleDefaults";
+import sessionDefaults from "../Defaults/SessionDefaults";
 
 import ExceptionManager from "./ExceptionManager";
 
@@ -80,6 +80,6 @@ export default class SessionManager {
   }
 
   _getSessionSettingsDefault() {
-    return sessionDefault;
+    return sessionDefaults;
   }
 }

@@ -1,4 +1,4 @@
-import moduleDefaults from "../Defaults/ModuleDefault";
+import moduleDefaults from "../Defaults/ModuleDefaults";
 
 import FieldsController from "./FieldsController";
 import APIController from "./APIController";

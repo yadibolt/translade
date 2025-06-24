@@ -1,4 +1,4 @@
-import moduleDefaults from "../Defaults/ModuleDefault";
+import moduleDefaults from "../Defaults/ModuleDefaults";
 
 import SessionManager from "../Manager/SessionManager";
 import FieldHistoryController from "./FieldHistoryController";

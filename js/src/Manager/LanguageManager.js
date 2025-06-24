@@ -1,4 +1,4 @@
-import moduleDefaults from "../Defaults/ModuleDefault";
+import moduleDefaults from "../Defaults/ModuleDefaults";
 
 export default class LanguageManager {
   constructor() {}
