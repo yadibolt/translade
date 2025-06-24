@@ -183,7 +183,7 @@ class SettingsForm extends ConfigFormBase {
     if (!str_contains($languages, ':')) {
         $form_state->setErrorByName('languages', $this->t('Please ensure that each language is defined with a code and a name, separated by a colon (:). For example: "en:English,fr:French".'));
     }
-    if (!preg_match('/^[a-zA-Z:, ]+$/', $languages)) {
+    if (!preg_match('/^[\p{L}:, ]+$/u', $languages)) {
         $form_state->setErrorByName('languages', $this->t('Please ensure that the languages are defined correctly, using only letters, commas, and colons.'));
     }
   }
