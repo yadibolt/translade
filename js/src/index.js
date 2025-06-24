@@ -23,11 +23,8 @@ import LanguageManager from "./Manager/LanguageManager";
     let rendererController = new RendererController();
 
     window.transladeConfig = new ConfigurationManager().initConfiguration();
-    window.transladeInputControl = { suspend: false };
     new SessionManager().initSession();
-
     await new LanguageManager().setTranslationSet(window.transladeConfig.contentLanguage.toString());
-
     rendererController.renderActionsForFields();
     new EventListenerController().addEventListeners();
   };
