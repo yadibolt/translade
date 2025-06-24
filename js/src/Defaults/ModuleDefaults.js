@@ -1,7 +1,8 @@
 const moduleDefaults = {
   modulePrefix: "<Translade>:",
   sessionName: "translade-settings",
-  assetsFolder: "/modules/translade/",
+  assetsFolder: "/modules/translade",
+  localesFolder: "/modules/translade/locales",
   selectedLangIdDefault: "default",
   maximumHistoryLength: 10,
   specialToken: "|TRSLD_SPT|",
