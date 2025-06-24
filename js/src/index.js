@@ -2,29 +2,32 @@ import ConfigurationManager from "./Manager/ConfigurationManager";
 import SessionManager from "./Manager/SessionManager";
 import RendererController from "./Controllers/RendererController";
 import EventListenerController from "./Controllers/EventListenerController";
+import LanguageManager from "./Manager/LanguageManager";
 
 (function (Drupal, once) {
   "use strict";
 
   Drupal.behaviors.translade = {
     attach: function (context, settings) {
-      once("translade", "body", context).forEach(function () {
+      once("translade", "body", context).forEach(async function () {
         if (document.readyState === "loading") {
           document.addEventListener("DOMContentLoaded", initModuleScript);
         } else {
-          initModuleScript();
+          await initModuleScript();
         }
       });
     },
   };
 
-  const initModuleScript = () => {
+  const initModuleScript = async () => {
     let rendererController = new RendererController();
 
     window.transladeConfig = new ConfigurationManager().initConfiguration();
     window.transladeInputControl = { suspend: false };
-
     new SessionManager().initSession();
+
+    await new LanguageManager().setTranslationSet(window.transladeConfig.contentLanguage.toString());
+
     rendererController.renderActionsForFields();
     new EventListenerController().addEventListeners();
   };

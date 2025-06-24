@@ -8,9 +8,17 @@ import ATag from "../Elements/ATag";
 import OptionTag from "../Elements/OptionTag";
 import SelectTag from "../Elements/SelectTag";
 import LabelTag from "../Elements/LabelTag";
+import LanguageManager from "../Manager/LanguageManager";
 
 export default class ActionsController {
-  constructor() {}
+  /**
+   *
+   * @type {object|null}
+   */
+  tSet = null;
+  constructor() {
+    this.tSet = new LanguageManager().getTranslationSet();
+  }
 
   createActionsForField(fieldId) {
     const themeClassName = window.transladeConfig.darkTheme ? "dark" : "light";
@@ -34,16 +42,22 @@ export default class ActionsController {
 
     contentAIActions.push(
       new OptionTag({
-        name: "# Action",
+        name: this.tSet.actionName,
         value: "default",
       }).getDefault(),
     );
     window.transladeConfig.contentAIActions.forEach((action, _) => {
       const values = action.split(":");
+
+      let translatedValue = values[0];
+      if (Object.keys(this.tSet).some((key) => key.toString() === values[0].toString())) {
+        translatedValue = this.tSet[values[0]];
+      }
+
       // values[0] is the action ID, values[1] is the action name
       contentAIActions.push(
         new OptionTag({
-          name: values[1],
+          name: translatedValue,
           value: values[0],
         }).getDefault(),
       );
@@ -54,11 +68,11 @@ export default class ActionsController {
     }).getDefault();
     const backIcon = new ImageTag({
       src: `${moduleDefaults.assetsFolder}/icons/back.svg`,
-      alt: "Back",
+      alt: this.tSet.back,
     }).getDefault();
     const translateIcon = new ImageTag({
       src: `${moduleDefaults.assetsFolder}/icons/translate.svg`,
-      alt: "Translate",
+      alt: this.tSet.translate,
     }).getDefault();
     const languageSelect = new SelectTag({
       classNames: ["translade-languageTo"],
@@ -73,17 +87,17 @@ export default class ActionsController {
     const loaderIcon = new SpanTag({ classNames: ["loader"] }).getDefault();
 
     const languageSelectLabel = new LabelTag({
-      content: "Language to translate to",
+      content: this.tSet.languageTranslateTo,
       classNames: ["translade-label"],
     }).getDefault();
     const contentAIActionSelectLabel = new LabelTag({
-      content: "Choose an action",
+      content: this.tSet.chooseAction,
       classNames: ["translade-label"],
     }).getDefault();
 
     const aBack = new ATag({
       classNames: ["translade-action-trigger", "back"],
-      title: "Back to previous text",
+      title: this.tSet.backToPreviousText,
       dataset: {
         targetField: fieldId,
       },
@@ -91,7 +105,7 @@ export default class ActionsController {
     aBack.appendChild(backIcon);
     const aTranslate = new ATag({
       classNames: ["translade-action-trigger", "translate"],
-      title: "Translate text",
+      title: this.tSet.translateText,
       dataset: {
         targetField: fieldId,
       },
@@ -116,7 +130,7 @@ export default class ActionsController {
 
     const aLoader = new ATag({
       classNames: ["translade-action-trigger", "load", "action-hide"],
-      title: "Loading",
+      title: this.tSet.loading,
       dataset: {
         targetField: fieldId,
       },

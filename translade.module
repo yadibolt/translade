@@ -24,7 +24,7 @@ function translade_form_alter(&$form, FormStateInterface $form_state, $form_id):
   // actions processing
   $actions = [];
   foreach ($config_ai_actions as $key => $value) {
-    $actions[] = $key . ":" . $ai_actions[$key];
+    $actions[] = $key . ":" . t($ai_actions[$key]);
   }
 
   $form_shorthand_type = "node_";

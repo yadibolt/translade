@@ -1,0 +1,18 @@
+{
+  "actionName": "# Akcia",
+  "back": "Späť",
+  "translate": "Preložiť",
+  "languageTranslateTo": "Jazyk pre preklad",
+  "chooseAction": "Zvoľte akciu",
+  "backToPreviousText": "Späť na predchádzajúci text",
+  "translateText": "Preložiť text",
+  "loading": "Načítava sa",
+  "rewriteRephrase": "Prepísať/Preformulovať",
+  "simplify": "Zjednodušiť",
+  "checkGrammar": "Skontrolovať gramatiku",
+  "summarize": "Zhrnúť",
+  "expansionElaboration": "Rozšírenie/Podrobnejšie vysvetlenie",
+  "shortenCondense": "Skrátiť/Zhutniť",
+  "changeToneProfessional": "Zmeniť tón (Profesionálny)",
+  "changeToneCasual": "Zmeniť tón (Neformálny)"
+}

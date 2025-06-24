@@ -5,7 +5,7 @@ import { getById } from "../Util/DocumentUtil";
 export default class ConfigurationManager {
   constructor() {}
 
-  initConfiguration() {
+  initConfiguration(DrupalObject) {
     const configuration = getById("translade-shadow-root-config");
     const configurationValue = String(configuration.value);
     if (configurationValue.length <= 0)
@@ -37,6 +37,7 @@ export default class ConfigurationManager {
         darkTheme: Boolean(parsedConfiguration.dark_theme),
         contentAIActions: contentAIActions,
         formId: String(parsedConfiguration.form_id),
+        translationSet: null,
         history: {},
       };
     } catch (e) {

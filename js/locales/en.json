@@ -1,0 +1,18 @@
+{
+  "actionName": "# Action",
+  "back": "Back",
+  "translate": "Translate",
+  "languageTranslateTo": "Language to translate to",
+  "chooseAction": "Choose an action",
+  "backToPreviousText": "Back to previous text",
+  "translateText": "Translate text",
+  "loading": "Loading",
+  "rewriteRephrase": "Rewrite/Rephrase",
+  "simplify": "Simplify",
+  "checkGrammar": "Check Grammar",
+  "summarize": "Summarize",
+  "expansionElaboration": "Expansion/Elaboration",
+  "shortenCondense": "Shorten/Condense",
+  "changeToneProfessional": "Change Tone (Professional)",
+  "changeToneCasual": "Change Tone (Casual)"
+}
