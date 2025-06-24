@@ -92,9 +92,21 @@ class SettingsForm extends ConfigFormBase {
 
     $form['content_options']['content_types'] = [
       '#type' => 'checkboxes',
+      '#prefix' => '<div class="translade-container"><div class="t-col">',
+      '#suffix' => '</div>',
       '#title' => $this->t('Enable translation for these content types:'),
       '#options' => $this->getAvailableContentTypes(),
       '#default_value' => $this->prepareDefaultOptionsContentTypes(),
+      '#weight' => $weight++,
+    ];
+
+    $form['content_options']['taxonomy_types'] = [
+      '#type' => 'checkboxes',
+      '#prefix' => '<div class="t-col">',
+      '#suffix' => '</div></div>',
+      '#title' => $this->t('Enable translation for these taxonomy types:'),
+      '#options' => $this->getAvailableTaxonomyTypes(),
+      '#default_value' => $this->prepareDefaultOptionsTaxonomyTypes(),
       '#weight' => $weight++,
     ];
 
@@ -168,6 +180,7 @@ class SettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $content_types = array_filter($form_state->getValue('content_types'));
     $ai_actions = $form_state->getValue('content_ai_actions');
+    $taxonomy_types = array_filter($form_state->getValue('taxonomy_types'));
 
     $prepared_content_types = $this->prepareFormDataOptionsContentType($content_types);
     $content_types_defaults = $this->prepareDefaultOptionsContentTypes();
@@ -175,6 +188,9 @@ class SettingsForm extends ConfigFormBase {
     $prepared_ai_actions = $this->prepareFormDataOptionsAIActions($ai_actions);
     $ai_actions_defaults = $this->prepareDefaultOptionsAIActions();
     sort($prepared_ai_actions); sort($ai_actions_defaults);
+    $prepared_taxonomy_types = $this->prepareFormDataOptionsTaxonomyTypes($taxonomy_types);
+    $taxonomy_types_defaults = $this->prepareDefaultOptionsTaxonomyTypes();
+    sort($prepared_taxonomy_types); sort($taxonomy_types_defaults);
 
     if ($prepared_content_types != $content_types_defaults) {
       $this->config('translade.settings')
@@ -190,6 +206,14 @@ class SettingsForm extends ConfigFormBase {
         ->save();
 
       \Drupal::messenger()->addStatus($this->t('AI Actions have been updated.'));
+    }
+
+    if ($prepared_taxonomy_types != $taxonomy_types_defaults) {
+      $this->config('translade.settings')
+        ->set('taxonomy_types', $taxonomy_types)
+        ->save();
+
+      \Drupal::messenger()->addStatus($this->t('Taxonomy types have been updated.'));
     }
 
     $model = $form_state->getValue('openai_model');
@@ -262,6 +286,24 @@ class SettingsForm extends ConfigFormBase {
     return $defaults_manager->getAIActions();
   }
 
+  public function getAvailableTaxonomyTypes(): array {
+    $options = [];
+    $module_handler = \Drupal::service('module_handler');
+
+    if ($module_handler->moduleExists('taxonomy')) {
+      try {
+        $taxonomy_types = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->loadMultiple();
+        foreach ($taxonomy_types as $type) {
+          $options[$type->id()] = $type->label();
+        }
+      } catch (\Exception $e) {
+        \Drupal::logger('translade')->error('Failed to load taxonomy types: @message', ['@message' => $e->getMessage()]);
+      }
+    }
+
+    return $options;
+  }
+
   public function prepareDefaultOptionsContentTypes(): array {
     $config = $this->config('translade.settings');
     if ($config === NULL) {
@@ -292,11 +334,30 @@ class SettingsForm extends ConfigFormBase {
     return $default_options;
   }
 
+  public function prepareDefaultOptionsTaxonomyTypes(): array {
+    $config = $this->config('translade.settings');
+    if ($config === NULL) {
+      return [];
+    }
+
+    $default_options = $config->get('taxonomy_types') ?: [];
+
+    if (!is_array($default_options)) {
+      $default_options = [];
+    }
+
+    return $default_options;
+  }
+
   public function prepareFormDataOptionsContentType(array $data): array {
     return $data ?: [];
   }
 
   public function prepareFormDataOptionsAIActions(array $data): array {
+    return $data ?: [];
+  }
+
+  public function prepareFormDataOptionsTaxonomyTypes(array $data): array {
     return $data ?: [];
   }
 }

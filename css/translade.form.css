@@ -152,6 +152,24 @@ label.translade-label {
   margin: -0.45rem 4px 0 4px;
 }
 
+.translade-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.translade-container .t-col {
+  width: 50%;
+}
+
+@media screen and (max-width: 870px) {
+  .translade-container {
+    flex-direction: column;
+  }
+  .translade-container .t-col {
+    width: 100%;
+  }
+}
+
 /* Color options */
 /* Dark mode */
 .translade-actions-wrapper.dark {
