@@ -2,14 +2,28 @@
 
 namespace Drupal\translade\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\translade\Connector\OpenAIConnector;
+use Drupal\translade\Provider\GoogleProvider;
+use Drupal\translade\Provider\OpenAIProvider;
 use Drupal\commerce_product\Entity\ProductVariationType;
 use Drupal\translade\Manager\DefaultsManager;
 use Drupal\translade\Manager\ProviderManager;
 
 class SettingsForm extends ConfigFormBase {
+  private OpenAIProvider|GoogleProvider $provider;
+  private ProviderManager $provider_manager;
+  private DefaultsManager $defaults_manager;
+
+  public function __construct(ConfigFactoryInterface $config_factory, $typedConfigManager = NULL)
+  {
+    parent::__construct($config_factory, $typedConfigManager);
+    $this->provider = ProviderManager::getProvider();
+    $this->provider_manager = new ProviderManager();
+    $this->defaults_manager = new DefaultsManager();
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -31,12 +45,10 @@ class SettingsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $weight = 0;
-    $config = \Drupal::config('translade.settings') ?: [];
+    $config = $this->config('translade.settings') ?: [];
     $provider_form_url = \Drupal::urlGenerator()->generateFromRoute('translade.providers');
-    $openai_connector = new OpenAIConnector();
-    $provider_manager = new ProviderManager();
-    $api_key_exists = $provider_manager->checkAnyAPIKeyExists();
-    $provider_exists = $provider_manager->checkSelectedProvider();
+    $api_key_exists = $this->provider_manager->checkAnyAPIKeyExists();
+    $provider_exists = $this->provider_manager->checkSelectedProvider();
 
     $form['messages'] = [
       '#type' => 'markup',
@@ -62,7 +74,7 @@ class SettingsForm extends ConfigFormBase {
     }
 
     if ($config->get('provider_name') === 'openai') {
-      $models = $openai_connector->getOpenAIModels();
+      $models = $this->provider->getModels();
       $model_options = [];
       foreach ($models as $model) {
         $model_options[$model['id']] = $model['id'];
@@ -272,8 +284,7 @@ class SettingsForm extends ConfigFormBase {
   }
 
   public function getAvailableAIActions(): array {
-    $defaults_manager = new DefaultsManager();
-    return $defaults_manager->getAIActions();
+    return $this->defaults_manager->getAIActions();
   }
 
   public function getAvailableTaxonomyTypes(): array {
@@ -295,11 +306,7 @@ class SettingsForm extends ConfigFormBase {
   }
 
   public function prepareDefaultOptionsContentTypes(): array {
-    $config = $this->config('translade.settings');
-    if ($config === NULL) {
-      return [];
-    }
-
+    $config = $this->config('translade.settings') ?: [];
     $default_options = $config->get('content_types') ?: [];
 
     if (!is_array($default_options)) {
@@ -310,11 +317,7 @@ class SettingsForm extends ConfigFormBase {
   }
 
   public function prepareDefaultOptionsAIActions(): array {
-    $config = $this->config('translade.settings');
-    if ($config === NULL) {
-      return [];
-    }
-
+    $config = $this->config('translade.settings') ?: [];
     $default_options = $config->get('content_ai_actions') ?: [];
 
     if (!is_array($default_options)) {
@@ -325,11 +328,7 @@ class SettingsForm extends ConfigFormBase {
   }
 
   public function prepareDefaultOptionsTaxonomyTypes(): array {
-    $config = $this->config('translade.settings');
-    if ($config === NULL) {
-      return [];
-    }
-
+    $config = $this->config('translade.settings') ?: [];
     $default_options = $config->get('taxonomy_types') ?: [];
 
     if (!is_array($default_options)) {

@@ -2,18 +2,41 @@
 
 namespace Drupal\translade\Manager;
 
+use Drupal\Core\Config\Config;
+use Drupal\translade\Provider\GoogleProvider;
+use Drupal\translade\Provider\OpenAIProvider;
+
 class ProviderManager {
-  public function __construct() {}
+  private Config $config;
+  private CONST DEFAULT_PROVIDERS = [
+    'openai' => 'OpenAI',
+    'google' => 'Google',
+  ];
+
+  public function __construct() {
+    $this->config = \Drupal::config('translade.settings');
+  }
+
+  public static function getProvider(): OpenAIProvider|GoogleProvider|null {
+    $config = \Drupal::config('translade.settings');
+    return match ($config->get('provider_name') ?: 'openai') {
+      'openai' => new OpenAIProvider(),
+      'google' => new GoogleProvider(),
+      default => null,
+    };
+  }
+
+  public static function getProviders(): array {
+    return self::DEFAULT_PROVIDERS;
+  }
 
   public function checkAnyAPIKeyExists(): bool {
-    $config = \Drupal::config('translade.settings');
-    return !empty($config->get('openai_api_key')) || !empty($config->get('google_api_key'));
+    return !empty($this->config->get('openai_api_key')) || !empty($this->config->get('google_api_key'));
   }
 
   public function checkSelectedProvider(): bool {
-    $config = \Drupal::config('translade.settings');
-    $provider_name = $config->get('provider_name') ?: 'openai';
+    $provider_name = $this->config->get('provider_name') ?: 'openai';
 
-    return !empty($config->get($provider_name . '_api_key'));
+    return !empty($this->config->get($provider_name . '_api_key'));
   }
 }

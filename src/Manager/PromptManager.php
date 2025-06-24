@@ -3,7 +3,10 @@
 namespace Drupal\translade\Manager;
 
 class PromptManager {
-  public function __construct() {}
+  private LanguageManager $language_manager;
+  public function __construct() {
+    $this->language_manager = new LanguageManager();
+  }
 
   public function getTranslationPrompt(array $tokens = []): string {
     $prompt = $this->_getTranslationRoleDefinition();
@@ -70,7 +73,7 @@ class PromptManager {
 
   private function _getTranslationRoleDefinition(): string {
     return "You are a helpful translation assistant.
-    Your task is to translate the following content from @source_lang to @target_lang.
+    Your task is to translate the following content to @target_lang.
     DO NOT translate |TRSLD_SPT| to anything else if it appears in the text. It is a special tag that has to remain unchanged.\n";
   }
 
@@ -178,11 +181,10 @@ class PromptManager {
   }
 
   private function formatPrompt(string $prompt, array $tokens): string {
-    $language_manager = new LanguageManager();
     $token_prompt = $prompt;
 
     foreach ($tokens as $token => $value) {
-      $token_prompt = str_replace($token, $language_manager->getLangFromId($value), $token_prompt);
+      $token_prompt = str_replace($token, $this->language_manager->getLangFromId($value), $token_prompt);
     }
 
     return $token_prompt;

@@ -4,6 +4,7 @@ namespace Drupal\translade\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\translade\Manager\ProviderManager;
 
 class ProviderForm extends ConfigFormBase {
   /**
@@ -27,7 +28,7 @@ class ProviderForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $weight = 0;
-    $config = \Drupal::config('translade.settings') ?: [];
+    $config = $this->config('translade.settings') ?: [];
     $openai_masked = $config->get('openai_api_key') ? ': ' . substr($config->get('openai_api_key'), 0, 7) . '-*****-*****-' . substr($config->get('openai_api_key'), -7, 7) : '';
     $google_masked = $config->get('google_api_key') ? ': ' . substr($config->get('google_api_key'), 0, 7) . '-*****-*****-' . substr($config->get('google_api_key'), -7, 7) : '';
 
@@ -89,7 +90,7 @@ class ProviderForm extends ConfigFormBase {
     $form['provider']['provider_name'] = [
       '#type' => 'select',
       '#title' => $this->t('Provider to use'),
-      '#options' => $this->getOptionsProviders(),
+      '#options' => ProviderManager::getProviders(),
       '#default_value' => $config->get('provider_name') ?: 'openai',
       '#description' => $this->t('Select the provider you want to use.'),
       '#weight' => $weight++,
@@ -130,7 +131,7 @@ class ProviderForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    $config = $this->config('translade.settings');
+    $config = $this->config('translade.settings') ?: [];
 
     if (!empty($form_state->getValue('openai_api_key'))) {
       if (trim($form_state->getValue('openai_api_key')) === 'clear') {
@@ -175,12 +176,5 @@ class ProviderForm extends ConfigFormBase {
         \Drupal::messenger()->addMessage($this->t("Provider has been changed to: @provider.", ['@provider' => $provider_name]), 'status');
       }
     }
-  }
-
-  public function getOptionsProviders(): array {
-    return [
-      'openai' => 'OpenAI',
-      'google' => 'Google',
-    ];
   }
 }

@@ -3,16 +3,20 @@
 namespace Drupal\translade\Manager;
 
 use Drupal\Core\Config\ConfigBase;
+use Drupal\Core\Config\ImmutableConfig;
 
 class LanguageManager extends ConfigBase {
+  private ImmutableConfig $config;
+  private CONST DEFAULT_LANGUAGE = 'English';
 
-  public function __construct() {}
+  public function __construct() {
+    $this->config = \Drupal::config('translade.settings');
+  }
 
   public function getLangFromId(string $lang_id): string {
-    $config = \Drupal::config('translade.settings');
-    $config_languages = $config->get('languages');
+    $config_languages = $this->config->get('languages');
 
-    if (empty($config_languages)) return 'English';
+    if (empty($config_languages)) return self::DEFAULT_LANGUAGE;
 
     $languages_arr = explode(',', $config_languages);
 
@@ -22,6 +26,6 @@ class LanguageManager extends ConfigBase {
       }
     }
 
-    return "English";
+    return self::DEFAULT_LANGUAGE;
   }
 }

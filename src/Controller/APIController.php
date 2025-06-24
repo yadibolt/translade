@@ -3,18 +3,22 @@
 namespace Drupal\translade\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\translade\Connector\OpenAIConnector;
+use Drupal\translade\Manager\ProviderManager;
+use Drupal\translade\Provider\GoogleProvider;
+use Drupal\translade\Provider\OpenAIProvider;
 use Drupal\translade\Manager\PromptManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 class APIController extends ControllerBase {
+  private OpenAIProvider|GoogleProvider $provider;
+  private PromptManager $prompt_manager;
 
-  public function __construct() {}
+  public function __construct() {
+    $this->provider = ProviderManager::getProvider();
+    $this->prompt_manager = new PromptManager();
+  }
 
   public function translate(Request $request): JsonResponse {
-    $openai_connector = new OpenAIConnector();
-    $prompt_manager = new PromptManager();
-
     $content = json_decode($request->getContent(), TRUE);
 
     if (!$content) return new JsonResponse(['error' => 'Invalid JSON data.'], 400);
@@ -29,13 +33,13 @@ class APIController extends ControllerBase {
       return new JsonResponse(['error' => 'Missing required parameters'], 400);
     }
 
-    $prompt = $prompt_manager->getTranslationPrompt([
+    $prompt = $this->prompt_manager->getTranslationPrompt([
       '@source_lang' => $source_lang,
       '@target_lang' => $target_lang,
     ]);
 
     $data = [
-      'model' => $openai_connector->getDefaultModel(),
+      'model' => $this->provider->getDefaultModel(),
       'temperature' => 0,
       'messages' => [
         [
@@ -48,7 +52,7 @@ class APIController extends ControllerBase {
         ],
       ]
     ];
-    $response = $openai_connector->makeRequest('chat/completions', 'POST', $data);
+    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
@@ -70,9 +74,6 @@ class APIController extends ControllerBase {
   }
 
   public function rephrase(Request $request): JsonResponse {
-    $openai_connector = new OpenAIConnector();
-    $prompt_manager = new PromptManager();
-
     $content = json_decode($request->getContent(), TRUE);
 
     if (!$content) return new JsonResponse(['error' => 'Invalid JSON data.'], 400);
@@ -86,10 +87,10 @@ class APIController extends ControllerBase {
       return new JsonResponse(['error' => 'Missing required parameters'], 400);
     }
 
-    $prompt = $prompt_manager->getRephrasePrompt();
+    $prompt = $this->prompt_manager->getRephrasePrompt();
 
     $data = [
-      'model' => $openai_connector->getDefaultModel(),
+      'model' => $this->provider->getDefaultModel(),
       'temperature' => 0,
       'messages' => [
         [
@@ -102,7 +103,7 @@ class APIController extends ControllerBase {
         ],
       ]
     ];
-    $response = $openai_connector->makeRequest('chat/completions', 'POST', $data);
+    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
@@ -123,9 +124,6 @@ class APIController extends ControllerBase {
   }
 
   public function checkGrammar(Request $request): JsonResponse {
-    $openai_connector = new OpenAIConnector();
-    $prompt_manager = new PromptManager();
-
     $content = json_decode($request->getContent(), TRUE);
 
     if (!$content) return new JsonResponse(['error' => 'Invalid JSON data.'], 400);
@@ -139,10 +137,10 @@ class APIController extends ControllerBase {
       return new JsonResponse(['error' => 'Missing required parameters'], 400);
     }
 
-    $prompt = $prompt_manager->getCheckGrammarPrompt();
+    $prompt = $this->prompt_manager->getCheckGrammarPrompt();
 
     $data = [
-      'model' => $openai_connector->getDefaultModel(),
+      'model' => $this->provider->getDefaultModel(),
       'temperature' => 0,
       'messages' => [
         [
@@ -155,7 +153,7 @@ class APIController extends ControllerBase {
         ],
       ]
     ];
-    $response = $openai_connector->makeRequest('chat/completions', 'POST', $data);
+    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
@@ -176,9 +174,6 @@ class APIController extends ControllerBase {
   }
 
   public function summarize(Request $request): JsonResponse {
-    $openai_connector = new OpenAIConnector();
-    $prompt_manager = new PromptManager();
-
     $content = json_decode($request->getContent(), TRUE);
 
     if (!$content) return new JsonResponse(['error' => 'Invalid JSON data.'], 400);
@@ -192,10 +187,10 @@ class APIController extends ControllerBase {
       return new JsonResponse(['error' => 'Missing required parameters'], 400);
     }
 
-    $prompt = $prompt_manager->getSummarizePrompt();
+    $prompt = $this->prompt_manager->getSummarizePrompt();
 
     $data = [
-      'model' => $openai_connector->getDefaultModel(),
+      'model' => $this->provider->getDefaultModel(),
       'temperature' => 0,
       'messages' => [
         [
@@ -208,7 +203,7 @@ class APIController extends ControllerBase {
         ],
       ]
     ];
-    $response = $openai_connector->makeRequest('chat/completions', 'POST', $data);
+    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
@@ -229,9 +224,6 @@ class APIController extends ControllerBase {
   }
 
   public function expandContent(Request $request): JsonResponse {
-    $openai_connector = new OpenAIConnector();
-    $prompt_manager = new PromptManager();
-
     $content = json_decode($request->getContent(), TRUE);
 
     if (!$content) return new JsonResponse(['error' => 'Invalid JSON data.'], 400);
@@ -245,10 +237,10 @@ class APIController extends ControllerBase {
       return new JsonResponse(['error' => 'Missing required parameters'], 400);
     }
 
-    $prompt = $prompt_manager->getExpandContentPrompt();
+    $prompt = $this->prompt_manager->getExpandContentPrompt();
 
     $data = [
-      'model' => $openai_connector->getDefaultModel(),
+      'model' => $this->provider->getDefaultModel(),
       'temperature' => 0,
       'messages' => [
         [
@@ -261,7 +253,7 @@ class APIController extends ControllerBase {
         ],
       ]
     ];
-    $response = $openai_connector->makeRequest('chat/completions', 'POST', $data);
+    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
@@ -282,9 +274,6 @@ class APIController extends ControllerBase {
   }
 
   public function shortenContent(Request $request): JsonResponse {
-    $openai_connector = new OpenAIConnector();
-    $prompt_manager = new PromptManager();
-
     $content = json_decode($request->getContent(), TRUE);
 
     if (!$content) return new JsonResponse(['error' => 'Invalid JSON data.'], 400);
@@ -298,10 +287,10 @@ class APIController extends ControllerBase {
       return new JsonResponse(['error' => 'Missing required parameters'], 400);
     }
 
-    $prompt = $prompt_manager->getShortenContentPrompt();
+    $prompt = $this->prompt_manager->getShortenContentPrompt();
 
     $data = [
-      'model' => $openai_connector->getDefaultModel(),
+      'model' => $this->provider->getDefaultModel(),
       'temperature' => 0,
       'messages' => [
         [
@@ -314,7 +303,7 @@ class APIController extends ControllerBase {
         ],
       ]
     ];
-    $response = $openai_connector->makeRequest('chat/completions', 'POST', $data);
+    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
@@ -335,9 +324,6 @@ class APIController extends ControllerBase {
   }
 
   public function changeToneProfessional(Request $request): JsonResponse {
-    $openai_connector = new OpenAIConnector();
-    $prompt_manager = new PromptManager();
-
     $content = json_decode($request->getContent(), TRUE);
 
     if (!$content) return new JsonResponse(['error' => 'Invalid JSON data.'], 400);
@@ -351,10 +337,10 @@ class APIController extends ControllerBase {
       return new JsonResponse(['error' => 'Missing required parameters'], 400);
     }
 
-    $prompt = $prompt_manager->getChangeToneProfessionalPrompt();
+    $prompt = $this->prompt_manager->getChangeToneProfessionalPrompt();
 
     $data = [
-      'model' => $openai_connector->getDefaultModel(),
+      'model' => $this->provider->getDefaultModel(),
       'temperature' => 0,
       'messages' => [
         [
@@ -367,7 +353,7 @@ class APIController extends ControllerBase {
         ],
       ]
     ];
-    $response = $openai_connector->makeRequest('chat/completions', 'POST', $data);
+    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
@@ -388,9 +374,6 @@ class APIController extends ControllerBase {
   }
 
   public function changeToneCasual(Request $request): JsonResponse {
-    $openai_connector = new OpenAIConnector();
-    $prompt_manager = new PromptManager();
-
     $content = json_decode($request->getContent(), TRUE);
 
     if (!$content) return new JsonResponse(['error' => 'Invalid JSON data.'], 400);
@@ -404,10 +387,10 @@ class APIController extends ControllerBase {
       return new JsonResponse(['error' => 'Missing required parameters'], 400);
     }
 
-    $prompt = $prompt_manager->getChangeToneCasualPrompt();
+    $prompt = $this->prompt_manager->getChangeToneCasualPrompt();
 
     $data = [
-      'model' => $openai_connector->getDefaultModel(),
+      'model' => $this->provider->getDefaultModel(),
       'temperature' => 0,
       'messages' => [
         [
@@ -420,7 +403,7 @@ class APIController extends ControllerBase {
         ],
       ]
     ];
-    $response = $openai_connector->makeRequest('chat/completions', 'POST', $data);
+    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
@@ -441,9 +424,6 @@ class APIController extends ControllerBase {
   }
 
   public function simplifyContent(Request $request): JsonResponse {
-    $openai_connector = new OpenAIConnector();
-    $prompt_manager = new PromptManager();
-
     $content = json_decode($request->getContent(), TRUE);
 
     if (!$content) return new JsonResponse(['error' => 'Invalid JSON data.'], 400);
@@ -457,10 +437,10 @@ class APIController extends ControllerBase {
       return new JsonResponse(['error' => 'Missing required parameters'], 400);
     }
 
-    $prompt = $prompt_manager->getSimplifyContentPrompt();
+    $prompt = $this->prompt_manager->getSimplifyContentPrompt();
 
     $data = [
-      'model' => $openai_connector->getDefaultModel(),
+      'model' => $this->provider->getDefaultModel(),
       'temperature' => 0,
       'messages' => [
         [
@@ -473,7 +453,7 @@ class APIController extends ControllerBase {
         ],
       ]
     ];
-    $response = $openai_connector->makeRequest('chat/completions', 'POST', $data);
+    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
