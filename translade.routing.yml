@@ -1,3 +1,11 @@
+translade.admin:
+  path: "/admin/config/system/translade/configure"
+  defaults:
+    _title: "Translade Configuration"
+    _form: '\Drupal\translade\Form\SettingsForm'
+  requirements:
+    _permission: "administer translade"
+
 translade.configure:
   path: "/admin/config/system/translade/configure"
   defaults:

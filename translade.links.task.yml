@@ -1,3 +1,8 @@
+translade.admin:
+  route_name: translade.admin
+  title: "Translade"
+  base_route: translade.configure
+
 translade.configure:
   route_name: translade.configure
   title: "Translade Configuration"
