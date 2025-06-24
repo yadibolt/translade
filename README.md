@@ -1,35 +1,63 @@
 # Translade
 
-**Translade** is a simple, standalone translation module for **Drupal 10** that leverages the capabilities of **LLMS** to translate string-based content automatically. Languages can be specified via a configuration alongside with translation prompt override, and content types that are allowed for translation.
+**Translade** is AI-based translation and content enhancement module for **Drupal 10/11**. It automatically translates text fields across content types using AI, while also offering flexible options to **summarize**, **condense**, or **modify** your content in other ways. **Translade** brings AI-driven translation and content enhancement to your Drupal workflows, making it easier than ever to maintain multilingual, polished content across your site.
 
----
+## Features
 
-## 🚀 Features
+- **AI-Powered Translations**
+  Automatically translates all text-based fields using OpenAI (Google support coming soon).
 
-- 🌍 Click & translate feature of string/text based content via supported providers
-- ⚙️ Admin settings for API key, content types, translation behaviour
-- 🔗 Designed to work with Drupal CMS via "module"
-- 🧠 Smart handling of HTML, special characters, and placeholders even **CKEditor** ( mainly via prompt definitions )
-- 👻Currently supported connectors/providers: **OpenAI**
+- **Content Transformation Options**
+  Choose from improvements like summarization, condensation, and tone adjustment. (There are more options than that)
 
----
+- **Broad Content Support**
+  Supports nodes (including ecommerce nodes), taxonomy terms, and CKEditor content.
 
-## 📦 Requirements
+- **Configurable Settings**
+  - Select AI model
+  - Define target languages
+  - Customize field translation behavior
+  - ... or set a theme? hah
 
-- Drupal 10 ( but it should work 10+ )
-- PHP 8.1+
-- OpenAI API Key (you can get one from https://platform.openai.com)
+- **UI Translation via JSON**
+  Add localized interface strings by dropping JSON files into the `/locales` folder.
 
----
+- **Translation History**
+  Each field has its own history which limit can be edited. Upon reloading the page the history is not retained!
 
-## 🔧 Installation
+## Installation
 
-Unfortunately, this project is not a composer project, so you have to download the release and unpack it in /modules folder 👌
+1. Install the module as you would any Drupal module, via drag&drop, no composer unfortunatelly.
+2. Go to the Translade providers page.
+3. Enter your API key and a provider you want to use.
+4. Go to the Translade configuration page.
+5. Specify the languages you want to use, select content types, taxonomy types you wish to integrate with.
+6. Select AI actions that you will be using.
+7. That's it! You are now able to swiftly translate and modify the text based content!
+8. (Optional) Create `/locales/your-language-id.json` files for UI translation. (Supports only **valid Drupal Language ids**)
 
----
+## Coming Soon
+
+- Google Translate provider
+- Field-level rollback
+- Batch translation operations
+
+## Requirements
+
+- Drupal 10 or 11
+- PHP 8.1 or higher
+- CKEditor 5 (optional)
+
+## Module modification
+
+This is definitely possible, and here is what you need to know
+
+- The JavaScript part is bundled with **Webpack**
+- **Webpack** configuration file `webpack.config.js` is included in the source
+- It is easy as editing the contents, running webpack, that's it!
 
 ## ❗ Warning
 
 This project is most likely not going to be maintained in the future. It is a "one stop solution", but depending on its use cases it might see an update.
 
-...and lastly, if you encounter any **bug** or you miss some **feature** let me know! 😊
+... and lastly, if you encounter any **bug** or you miss some **feature** let me know! 😊
