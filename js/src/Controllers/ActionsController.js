@@ -30,7 +30,13 @@ export default class ActionsController {
       // values[0] is the language ID, values[1] is the language name
       const isSelected =
         values[0] === new SessionManager().getSession().selectedLangId;
-      if (window.transladeConfig.contentLanguage === values[0]) return; // remove og lang from options
+
+      // current language cannot be removed due to how translation works in Drupal.
+      // clicking on "translate" in Drupal will take the original content and that is
+      // set to be default for the field. that said, we must let users manually
+      // change the language.
+      // if (window.transladeConfig.contentLanguage === values[0]) return;
+
       languageOptions.push(
         new OptionTag({
           name: values[1],
