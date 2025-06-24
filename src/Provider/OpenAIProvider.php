@@ -2,7 +2,7 @@
 
 namespace Drupal\translade\Provider;
 
-use Drupal\Core\Config\Config;
+use Drupal\Core\Config\ImmutableConfig;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Drupal\translade\Interface\TransladeProvider;
 
 class OpenAIProvider implements TransladeProvider {
-  private Config $config;
+  private ImmutableConfig $config;
   private string $api_key;
   private string $model;
   private Client $client;

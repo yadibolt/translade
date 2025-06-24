@@ -2,12 +2,12 @@
 
 namespace Drupal\translade\Manager;
 
-use Drupal\Core\Config\Config;
+use Drupal\Core\Config\ImmutableConfig;
 use Drupal\translade\Provider\GoogleProvider;
 use Drupal\translade\Provider\OpenAIProvider;
 
 class ProviderManager {
-  private Config $config;
+  private ImmutableConfig $config;
   private CONST DEFAULT_PROVIDERS = [
     'openai' => 'OpenAI',
     'google' => 'Google',
