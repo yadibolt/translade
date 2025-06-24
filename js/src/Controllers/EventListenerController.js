@@ -2,10 +2,11 @@ import moduleDefaults from "../Defaults/ModuleDefaults";
 
 import FieldsController from "./FieldsController";
 import APIController from "./APIController";
+import DrupalFieldTypeController from "./DrupalFieldTypeController";
 import FieldHistoryController from "./FieldHistoryController";
 import SessionManager from "../Manager/SessionManager";
 
-import { getAllByClass, getFirstBySelector } from "../Util/DocumentUtil";
+import {getAllByClass, getFirstByClass, getFirstBySelector} from "../Util/DocumentUtil";
 
 export default class EventListenerController {
   constructor() {}
@@ -15,6 +16,7 @@ export default class EventListenerController {
     this._evLisTranslateAction();
     this._evListLanguageChange();
     this._evLisAIActions();
+    this._evLisInputChanged();
   }
 
   _evLisBackAction() {
@@ -148,5 +150,51 @@ export default class EventListenerController {
         }
       });
     });
+  }
+
+  _evLisInputChanged() {
+    const drupalFieldTypeController = new DrupalFieldTypeController();
+    const fields = new FieldsController().getShadowRootFields();
+
+    fields.forEach((field, _) => {
+      const fieldId = field.id.replaceAll(
+        "translade-shadow-root-",
+        "translade-field-",
+      );
+
+      const subfield = getFirstByClass(fieldId);
+
+      const fieldTypeFull = Array.from(subfield.classList).find((className) =>
+        className.startsWith("translade-type-"),
+      );
+
+      if (!fieldTypeFull) return;
+
+      const fieldType = String(fieldTypeFull).replaceAll("translade-type-", "");
+
+      let element = null;
+
+      switch (fieldType) {
+        case "string":
+          element = drupalFieldTypeController.getStringTypeElement(subfield);
+          break;
+        case "string_long":
+          element = drupalFieldTypeController.getStringLongTypeElement(subfield);
+          break;
+        case "text":
+          element = drupalFieldTypeController.getStringTypeElement(subfield);
+          break;
+        case "text_long":
+          element = drupalFieldTypeController.getTextLongElement(subfield);
+          break;
+        case "text_with_summary":
+          element = drupalFieldTypeController.getTextWithSummaryElement(subfield);
+          break;
+      }
+
+      if (element) {
+        // TODO add event listener for input change
+      }
+    })
   }
 }

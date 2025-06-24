@@ -15,10 +15,18 @@ export default class DrupalFieldTypeController {
     return String(input.value);
   };
 
+  getStringTypeElement = (subfield) => {
+    return getFirstBySelector("input", subfield);
+  }
+
   getStringLongTypeValue = (subfield) => {
     const input = getFirstBySelector("textarea", subfield);
     return String(input.value);
   };
+
+  getStringLongTypeElement = (subfield) => {
+    return getFirstBySelector("textarea", subfield);
+  }
 
   getTextWithSummaryValue = (subfield) => {
     let textWithSummary = getAllBySelector(".form-textarea-wrapper", subfield);
@@ -66,6 +74,24 @@ export default class DrupalFieldTypeController {
     }
   };
 
+  getTextWithSummaryElement = (subfield) => {
+    let textWithSummary = getAllBySelector(".form-textarea-wrapper", subfield);
+    let summaryFieldWrapper = null;
+    let textFieldWrapper = null;
+
+    if (textWithSummary.length === 1) {
+      textFieldWrapper = textWithSummary[0];
+    } else {
+      summaryFieldWrapper = textWithSummary[0];
+      textFieldWrapper = textWithSummary[1];
+    }
+
+    return {
+      summary: getFirstBySelector("textarea", summaryFieldWrapper),
+      text: getFirstBySelector("textarea", textFieldWrapper),
+    };
+  }
+
   getTextLongValue = (subfield) => {
     let textWithSummary = getAllByClass(".form-textarea-wrapper", subfield);
     let textFieldWrapper = textWithSummary[0];
@@ -86,6 +112,13 @@ export default class DrupalFieldTypeController {
       return ckEditorValue.value;
     }
   };
+
+  getTextLongElement = (subfield) => {
+    let textWithSummary = getAllByClass(".form-textarea-wrapper", subfield);
+    let textFieldWrapper = textWithSummary[0];
+
+    return getFirstBySelector("textarea", textFieldWrapper);
+  }
 
   setStringTypeValue = (subfield, newValue) => {
     const input = getFirstBySelector("input", subfield);
