@@ -48,7 +48,7 @@ This is definitely possible, and here is what you need to know
 
 - The JavaScript part is bundled with **Webpack**
 - **Webpack** configuration file `webpack.config.js` is included in the source
-- It is easy as editing the contents, running webpack, that's it!
+- It is as easy as editing the contents, running webpack, that's it!
 
 ## ❗ Warning
 
