@@ -36,12 +36,6 @@
 7. That's it! You are now able to swiftly translate and modify the text based content!
 8. (Optional) Create `/locales/your-language-id.json` files for UI translation. (Supports only **valid Drupal Language ids**)
 
-## Coming Soon
-
-- Google Translate provider
-- Field-level rollback
-- Batch translation operations
-
 ## Requirements
 
 - Drupal 10 or 11
@@ -54,7 +48,7 @@ This is definitely possible, and here is what you need to know
 
 - The JavaScript part is bundled with **Webpack**
 - **Webpack** configuration file `webpack.config.js` is included in the source
-- It is easy as editing the contents, running webpack, that's it!
+- It is as easy as editing the contents, running webpack, that's it!
 
 ## ❗ Warning
 
