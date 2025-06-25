@@ -265,6 +265,16 @@ class SettingsForm extends ConfigFormBase {
       }
     }
 
+    $model = $form_state->getValue('google_model');
+    if (!empty($model)) {
+      if ($model !== $this->config('translade.settings')->get('google_model')) {
+        $this->config('translade.settings')
+          ->set('google_model', $model)
+          ->save();
+        \Drupal::messenger()->addStatus($this->t('Google model has been set to @model.', ['@model' => $model]));
+      }
+    }
+
     $languages = $form_state->getValue('languages');
     if ($languages !== $this->config('translade.settings')->get('languages')) {
       $this->config('translade.settings')
