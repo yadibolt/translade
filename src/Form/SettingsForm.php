@@ -195,6 +195,10 @@ class SettingsForm extends ConfigFormBase {
       '#weight' => $weight++,
     ];
 
+    // log the models
+    \Drupal::logger('translade')->debug('Available OpenAI models: @models', ['@models' => json_encode($config->get('openai_model'))]);
+    \Drupal::logger('translade')->debug('Available Google models: @models', ['@models' => json_encode($config->get('google_model'))]);
+
     $form['#attached']['library'][] = 'translade/transladecss';
 
     return $form;
@@ -256,7 +260,7 @@ class SettingsForm extends ConfigFormBase {
     }
 
     $model = $form_state->getValue('openai_model');
-    if (!empty($model)) {
+    if (!empty($model) && isset($model)) {
       if ($model !== $this->config('translade.settings')->get('openai_model')) {
         $this->config('translade.settings')
             ->set('openai_model', $model)
@@ -266,7 +270,7 @@ class SettingsForm extends ConfigFormBase {
     }
 
     $model = $form_state->getValue('google_model');
-    if (!empty($model)) {
+    if (!empty($model) && isset($model)) {
       if ($model !== $this->config('translade.settings')->get('google_model')) {
         $this->config('translade.settings')
           ->set('google_model', $model)
