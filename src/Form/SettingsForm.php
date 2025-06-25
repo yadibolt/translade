@@ -195,10 +195,6 @@ class SettingsForm extends ConfigFormBase {
       '#weight' => $weight++,
     ];
 
-    // log the models
-    \Drupal::logger('translade')->debug('Available OpenAI models: @models', ['@models' => json_encode($config->get('openai_model'))]);
-    \Drupal::logger('translade')->debug('Available Google models: @models', ['@models' => json_encode($config->get('google_model'))]);
-
     $form['#attached']['library'][] = 'translade/transladecss';
 
     return $form;
