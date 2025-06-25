@@ -224,12 +224,10 @@ export default class EventListenerController {
 
   _setInputWrites(fieldId, element) {
     const actionFn = (_) => {
-      console.log(element);
       clearTimeout(this.inputWrites.inputFields);
 
       this.inputWrites.inputFields = setTimeout(() => {
         new FieldHistoryController().setHistoryData(fieldId);
-        console.log(window.transladeConfig.history);
       }, this.inputWritesDelay);
     }
 

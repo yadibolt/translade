@@ -9,6 +9,7 @@ use Drupal\translade\Provider\OpenAIProvider;
 use Drupal\translade\Manager\PromptManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+
 class APIController extends ControllerBase {
   private OpenAIProvider|GoogleProvider $provider;
   private PromptManager $prompt_manager;
@@ -37,34 +38,19 @@ class APIController extends ControllerBase {
       '@source_lang' => $source_lang,
       '@target_lang' => $target_lang,
     ]);
-
-    $data = [
-      'model' => $this->provider->getDefaultModel(),
-      'temperature' => 0,
-      'messages' => [
-        [
-          'role' => 'system',
-          'content' => $prompt,
-        ],
-        [
-          'role' => 'user',
-          'content' => $text,
-        ],
-      ]
-    ];
-    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
+    $data = $this->provider->createChatRequestData($prompt, $text);
+    $response = $this->provider->makeRequest($this->provider::CHAT_ENDPOINT, 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
-    if (isset($response['choices'][0]['message']['content'])) {
-      $translated_text = trim($response['choices'][0]['message']['content']);
-    } else {
+    $result_text = $this->provider->processChatResponse($response);
+    if ($result_text === null) {
       return new JsonResponse(['error' => 'Translation failed'], 500);
     }
 
     return new JsonResponse([
       'status' => 'ok',
-      'translated_text' => $translated_text,
+      'translated_text' => $result_text,
       'form_id' => $form_id,
       'source_lang' => $source_lang,
       'target_lang' => $target_lang,
@@ -88,34 +74,19 @@ class APIController extends ControllerBase {
     }
 
     $prompt = $this->prompt_manager->getRephrasePrompt();
-
-    $data = [
-      'model' => $this->provider->getDefaultModel(),
-      'temperature' => 0,
-      'messages' => [
-        [
-          'role' => 'system',
-          'content' => $prompt,
-        ],
-        [
-          'role' => 'user',
-          'content' => $text,
-        ],
-      ]
-    ];
-    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
+    $data = $this->provider->createChatRequestData($prompt, $text);
+    $response = $this->provider->makeRequest($this->provider::CHAT_ENDPOINT, 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
-    if (isset($response['choices'][0]['message']['content'])) {
-      $rephrased_text = trim($response['choices'][0]['message']['content']);
-    } else {
+    $result_text = $this->provider->processChatResponse($response);
+    if ($result_text === null) {
       return new JsonResponse(['error' => 'Translation failed'], 500);
     }
 
     return new JsonResponse([
       'status' => 'ok',
-      'rephrased_text' => $rephrased_text,
+      'rephrased_text' => $result_text,
       'form_id' => $form_id,
       'source_lang' => $source_lang,
       'trigger_id' => $trigger_id,
@@ -138,34 +109,19 @@ class APIController extends ControllerBase {
     }
 
     $prompt = $this->prompt_manager->getCheckGrammarPrompt();
-
-    $data = [
-      'model' => $this->provider->getDefaultModel(),
-      'temperature' => 0,
-      'messages' => [
-        [
-          'role' => 'system',
-          'content' => $prompt,
-        ],
-        [
-          'role' => 'user',
-          'content' => $text,
-        ],
-      ]
-    ];
-    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
+    $data = $this->provider->createChatRequestData($prompt, $text);
+    $response = $this->provider->makeRequest($this->provider::CHAT_ENDPOINT, 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
-    if (isset($response['choices'][0]['message']['content'])) {
-      $checked_text = trim($response['choices'][0]['message']['content']);
-    } else {
+    $result_text = $this->provider->processChatResponse($response);
+    if ($result_text === null) {
       return new JsonResponse(['error' => 'Translation failed'], 500);
     }
 
     return new JsonResponse([
       'status' => 'ok',
-      'checked_text' => $checked_text,
+      'checked_text' => $result_text,
       'form_id' => $form_id,
       'source_lang' => $source_lang,
       'trigger_id' => $trigger_id,
@@ -188,34 +144,19 @@ class APIController extends ControllerBase {
     }
 
     $prompt = $this->prompt_manager->getSummarizePrompt();
-
-    $data = [
-      'model' => $this->provider->getDefaultModel(),
-      'temperature' => 0,
-      'messages' => [
-        [
-          'role' => 'system',
-          'content' => $prompt,
-        ],
-        [
-          'role' => 'user',
-          'content' => $text,
-        ],
-      ]
-    ];
-    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
+    $data = $this->provider->createChatRequestData($prompt, $text);
+    $response = $this->provider->makeRequest($this->provider::CHAT_ENDPOINT, 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
-    if (isset($response['choices'][0]['message']['content'])) {
-      $summarized_text = trim($response['choices'][0]['message']['content']);
-    } else {
+    $result_text = $this->provider->processChatResponse($response);
+    if ($result_text === null) {
       return new JsonResponse(['error' => 'Translation failed'], 500);
     }
 
     return new JsonResponse([
       'status' => 'ok',
-      'summarized_text' => $summarized_text,
+      'summarized_text' => $result_text,
       'form_id' => $form_id,
       'source_lang' => $source_lang,
       'trigger_id' => $trigger_id,
@@ -238,34 +179,19 @@ class APIController extends ControllerBase {
     }
 
     $prompt = $this->prompt_manager->getExpandContentPrompt();
-
-    $data = [
-      'model' => $this->provider->getDefaultModel(),
-      'temperature' => 0,
-      'messages' => [
-        [
-          'role' => 'system',
-          'content' => $prompt,
-        ],
-        [
-          'role' => 'user',
-          'content' => $text,
-        ],
-      ]
-    ];
-    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
+    $data = $this->provider->createChatRequestData($prompt, $text);
+    $response = $this->provider->makeRequest($this->provider::CHAT_ENDPOINT, 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
-    if (isset($response['choices'][0]['message']['content'])) {
-      $expanded_text = trim($response['choices'][0]['message']['content']);
-    } else {
+    $result_text = $this->provider->processChatResponse($response);
+    if ($result_text === null) {
       return new JsonResponse(['error' => 'Translation failed'], 500);
     }
 
     return new JsonResponse([
       'status' => 'ok',
-      'expanded_text' => $expanded_text,
+      'expanded_text' => $result_text,
       'form_id' => $form_id,
       'source_lang' => $source_lang,
       'trigger_id' => $trigger_id,
@@ -288,34 +214,19 @@ class APIController extends ControllerBase {
     }
 
     $prompt = $this->prompt_manager->getShortenContentPrompt();
-
-    $data = [
-      'model' => $this->provider->getDefaultModel(),
-      'temperature' => 0,
-      'messages' => [
-        [
-          'role' => 'system',
-          'content' => $prompt,
-        ],
-        [
-          'role' => 'user',
-          'content' => $text,
-        ],
-      ]
-    ];
-    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
+    $data = $this->provider->createChatRequestData($prompt, $text);
+    $response = $this->provider->makeRequest($this->provider::CHAT_ENDPOINT, 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
-    if (isset($response['choices'][0]['message']['content'])) {
-      $shortened_text = trim($response['choices'][0]['message']['content']);
-    } else {
+    $result_text = $this->provider->processChatResponse($response);
+    if ($result_text === null) {
       return new JsonResponse(['error' => 'Translation failed'], 500);
     }
 
     return new JsonResponse([
       'status' => 'ok',
-      'shortened_text' => $shortened_text,
+      'shortened_text' => $result_text,
       'form_id' => $form_id,
       'source_lang' => $source_lang,
       'trigger_id' => $trigger_id,
@@ -338,34 +249,19 @@ class APIController extends ControllerBase {
     }
 
     $prompt = $this->prompt_manager->getChangeToneProfessionalPrompt();
-
-    $data = [
-      'model' => $this->provider->getDefaultModel(),
-      'temperature' => 0,
-      'messages' => [
-        [
-          'role' => 'system',
-          'content' => $prompt,
-        ],
-        [
-          'role' => 'user',
-          'content' => $text,
-        ],
-      ]
-    ];
-    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
+    $data = $this->provider->createChatRequestData($prompt, $text);
+    $response = $this->provider->makeRequest($this->provider::CHAT_ENDPOINT, 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
-    if (isset($response['choices'][0]['message']['content'])) {
-      $changed_tone_professsional_text = trim($response['choices'][0]['message']['content']);
-    } else {
+    $result_text = $this->provider->processChatResponse($response);
+    if ($result_text === null) {
       return new JsonResponse(['error' => 'Translation failed'], 500);
     }
 
     return new JsonResponse([
       'status' => 'ok',
-      'changed_tone_professsional_text' => $changed_tone_professsional_text,
+      'changed_tone_professsional_text' => $result_text,
       'form_id' => $form_id,
       'source_lang' => $source_lang,
       'trigger_id' => $trigger_id,
@@ -388,34 +284,19 @@ class APIController extends ControllerBase {
     }
 
     $prompt = $this->prompt_manager->getChangeToneCasualPrompt();
-
-    $data = [
-      'model' => $this->provider->getDefaultModel(),
-      'temperature' => 0,
-      'messages' => [
-        [
-          'role' => 'system',
-          'content' => $prompt,
-        ],
-        [
-          'role' => 'user',
-          'content' => $text,
-        ],
-      ]
-    ];
-    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
+    $data = $this->provider->createChatRequestData($prompt, $text);
+    $response = $this->provider->makeRequest($this->provider::CHAT_ENDPOINT, 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
-    if (isset($response['choices'][0]['message']['content'])) {
-      $changed_tone_casual_text = trim($response['choices'][0]['message']['content']);
-    } else {
+    $result_text = $this->provider->processChatResponse($response);
+    if ($result_text === null) {
       return new JsonResponse(['error' => 'Translation failed'], 500);
     }
 
     return new JsonResponse([
       'status' => 'ok',
-      'changed_tone_casual_text' => $changed_tone_casual_text,
+      'changed_tone_casual_text' => $result_text,
       'form_id' => $form_id,
       'source_lang' => $source_lang,
       'trigger_id' => $trigger_id,
@@ -438,34 +319,19 @@ class APIController extends ControllerBase {
     }
 
     $prompt = $this->prompt_manager->getSimplifyContentPrompt();
-
-    $data = [
-      'model' => $this->provider->getDefaultModel(),
-      'temperature' => 0,
-      'messages' => [
-        [
-          'role' => 'system',
-          'content' => $prompt,
-        ],
-        [
-          'role' => 'user',
-          'content' => $text,
-        ],
-      ]
-    ];
-    $response = $this->provider->makeRequest('chat/completions', 'POST', $data);
+    $data = $this->provider->createChatRequestData($prompt, $text);
+    $response = $this->provider->makeRequest($this->provider::CHAT_ENDPOINT, 'POST', $data);
 
     if (!$response) return new JsonResponse(['error' => 'Failed to connect to OpenAI API'], 500);
 
-    if (isset($response['choices'][0]['message']['content'])) {
-      $simplified_text = trim($response['choices'][0]['message']['content']);
-    } else {
+    $result_text = $this->provider->processChatResponse($response);
+    if ($result_text === null) {
       return new JsonResponse(['error' => 'Translation failed'], 500);
     }
 
     return new JsonResponse([
       'status' => 'ok',
-      'simplified_text' => $simplified_text,
+      'simplified_text' => $result_text,
       'form_id' => $form_id,
       'source_lang' => $source_lang,
       'trigger_id' => $trigger_id,

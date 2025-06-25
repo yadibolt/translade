@@ -14,7 +14,11 @@ class OpenAIProvider implements TransladeProvider {
   private string $api_key;
   private string $model;
   private Client $client;
-  private const DEFAULT_MODEL = 'gpt-4o-mini';
+
+  public CONST DEFAULT_TEMPERATURE = 0;
+  public CONST DEFAULT_MODEL = 'gpt-4o-mini';
+  public CONST CHAT_ENDPOINT = 'chat/completions';
+  public CONST MODELS_ENDPOINT = 'models';
 
   public function __construct() {
     $this->config = \Drupal::config('translade.settings') ?: [];
@@ -57,8 +61,33 @@ class OpenAIProvider implements TransladeProvider {
     return false;
   }
 
+  public function createChatRequestData(string $system_prompt, string $user_text): array {
+    return [
+      'model' => self::DEFAULT_MODEL,
+      'temperature' => self::DEFAULT_TEMPERATURE,
+      'messages' => [
+        [
+          'role' => 'system',
+          'content' => $system_prompt,
+        ],
+        [
+          'role' => 'user',
+          'content' => $user_text,
+        ],
+      ]
+    ];
+  }
+
+  public function processChatResponse(array $response): string|null {
+    if (isset($response['choices'][0]['message']['content'])) {
+      return trim($response['choices'][0]['message']['content']);
+    }
+
+    return null;
+  }
+
   public function getModels(): bool|array {
-    $response = $this->makeRequest('models');
+    $response = $this->makeRequest(self::MODELS_ENDPOINT);
 
     if (isset($response['data']) && is_array($response['data'])) {
       return $response['data'];

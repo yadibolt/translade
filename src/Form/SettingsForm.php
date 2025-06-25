@@ -92,7 +92,7 @@ class SettingsForm extends ConfigFormBase {
         '#title' => $this->t('Select OpenAI Text Model'),
         '#description' => $this->t('Select the OpenAI model you want to use for translations.'),
         '#options' => $model_options,
-        '#default_value' => $config->get('model') ?: 'gpt-4o-mini',
+        '#default_value' => $config->get('openai_model') ?: $this->provider::DEFAULT_MODEL,
         '#weight' => $weight++,
       ];
     }
