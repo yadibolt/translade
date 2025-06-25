@@ -60,7 +60,7 @@ class ProviderForm extends ConfigFormBase {
     $form['google'] = [
       '#type' => 'details',
       '#title' => 'Google',
-      '#open' => FALSE,
+      '#open' => TRUE,
       '#weight' => $weight++,
     ];
 
@@ -73,10 +73,12 @@ class ProviderForm extends ConfigFormBase {
       '#weight' => $weight++,
     ];
 
-    $form['google']['google_not_supported'] = [
-      '#type' => 'markup',
-      '#markup' => "<p class='translade-error'>".$this->t('Google Provider is not yet supported by this module.')."</p>",
-      '#allowed_tags' => ['p'],
+    $form['google']['google_api_key'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Google API Key'),
+      '#description' => $this->t('Enter your Google API key to enable services. Type "clear" here and submit the form to remove the key.'),
+      '#rows' => 1,
+      '#columns' => 30,
       '#weight' => $weight++,
     ];
 

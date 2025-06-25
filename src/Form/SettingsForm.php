@@ -74,7 +74,7 @@ class SettingsForm extends ConfigFormBase {
     }
 
     if ($config->get('provider_name') === 'openai') {
-      $models = $this->provider->getModels();
+      $models = $this->provider->getModels() ?: [];
       $model_options = [];
       foreach ($models as $model) {
         $model_options[$model['id']] = $model['id'];
@@ -93,6 +93,31 @@ class SettingsForm extends ConfigFormBase {
         '#description' => $this->t('Select the OpenAI model you want to use for translations.'),
         '#options' => $model_options,
         '#default_value' => $config->get('openai_model') ?: $this->provider::DEFAULT_MODEL,
+        '#weight' => $weight++,
+      ];
+    }
+
+    if ($config->get('provider_name') === 'google') {
+      $models = $this->provider->getModels() ?: [];
+      $model_options = [];
+      foreach ($models as $model) {
+        $model_name = str_replace('models/', '', $model['name']);
+        $model_options[$model_name] = $model_name;
+      }
+
+      $form['google'] = [
+        '#type' => 'details',
+        '#title' => 'Google Options',
+        '#open' => TRUE,
+        '#weight' => $weight++,
+      ];
+
+      $form['google']['google_model'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Select Google Text Model'),
+        '#description' => $this->t('Select the Google model you want to use for translations.'),
+        '#options' => $model_options,
+        '#default_value' => $config->get('google_model') ?: $this->provider::DEFAULT_MODEL,
         '#weight' => $weight++,
       ];
     }

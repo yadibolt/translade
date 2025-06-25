@@ -22,8 +22,8 @@ class OpenAIProvider implements TransladeProvider {
 
   public function __construct() {
     $this->config = \Drupal::config('translade.settings') ?: [];
-    $this->api_key = $this->config->get('openai_api_key');
-    $this->model = $this->config->get('openai_model');
+    $this->api_key = $this->config->get('openai_api_key') ?: '';
+    $this->model = $this->config->get('openai_model') ?: self::DEFAULT_MODEL;
     $this->client = new Client([
       'base_uri' => 'https://api.openai.com/v1/',
       'headers' => [
@@ -36,8 +36,8 @@ class OpenAIProvider implements TransladeProvider {
     ]);
   }
 
-  public function makeRequest(string $endpoint, string $method = 'GET', array $data = []): mixed {
-    if (!$this->api_key) {
+  public function makeRequest(string $endpoint, string $method = 'GET', array $data = [], array $query_params = []): mixed {
+    if (empty($this->api_key)) {
       \Drupal::logger('translade')->error('OpenAI API key is not set in the configuration. Please set it in the Translade settings.');
       return new JsonResponse("Requested resource needs valid API key.", 400);
     }
@@ -47,15 +47,25 @@ class OpenAIProvider implements TransladeProvider {
       $options['json'] = $data;
     }
 
+    if (!empty($query_params)) {
+      $params = [];
+      foreach ($query_params as $key => $value) {
+        $params[] = urlencode($key) . '=' . urlencode($value);
+      }
+      $params = '?' . implode('&', $params);
+    } else {
+      $params = '';
+    }
+
     try {
-      $response = $this->client->request($method, $endpoint, $options);
+      $response = $this->client->request($method, $endpoint . $params, $options);
       $response_body = (string) $response->getBody();
 
       return json_decode($response_body, true);
     } catch (RequestException $e) {
-      \Drupal::logger('translade')->error("Requested resource ran into an exception: " . serialize($e));
+      \Drupal::logger('translade')->error("Requested resource ran into an exception: " . $e->getMessage());
     } catch (GuzzleException $e) {
-      \Drupal::logger('translade')->error("Requested resource ran into Guzzle exception: " . serialize($e));
+      \Drupal::logger('translade')->error("Requested resource ran into Guzzle exception: " . $e->getMessage());
     }
 
     return false;
@@ -79,8 +89,9 @@ class OpenAIProvider implements TransladeProvider {
   }
 
   public function processChatResponse(array $response): string|null {
-    if (isset($response['choices'][0]['message']['content'])) {
-      return trim($response['choices'][0]['message']['content']);
+    $response_text = $response['choices'][0]['message']['content'];
+    if (!empty($response_text)) {
+      return $response_text;
     }
 
     return null;
