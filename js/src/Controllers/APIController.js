@@ -4,7 +4,7 @@ import SessionManager from "../Manager/SessionManager";
 import FieldHistoryController from "./FieldHistoryController";
 import DrupalFieldTypeController from "./DrupalFieldTypeController";
 
-import { getFirstBySelector, swapActiveClassName } from "../Util/DocumentUtil";
+import {getById, getFirstBySelector, swapActiveClassName} from "../Util/DocumentUtil";
 
 export default class APIController {
   constructor() {}
@@ -100,6 +100,100 @@ export default class APIController {
               actionTranslate,
               actionLanguageSelect,
               actionAIActions,
+            ],
+            [actionLoader],
+            "action-hide",
+          );
+          reject(e);
+        });
+    });
+  }
+
+  translateTableField(fieldId, mainField) {
+    const config = window.transladeConfig;
+
+    const drupalFieldTypeController = new DrupalFieldTypeController();
+    const fieldHistoryController = new FieldHistoryController();
+    const session = new SessionManager().getSession();
+
+    // fieldId.split('-')[2] => ID
+    let translatableRecord = getById(`edit-strings-${fieldId.split('-')[2]}-original`);
+    if (!translatableRecord) return;
+    const translatableRecordValue = translatableRecord.value;
+    // TODO
+    const langOriginal = translatableRecord.parentNode.lang;
+
+    console.log(langOriginal);
+
+    let actionBack = getFirstBySelector("a.back", mainField);
+    let actionTranslate = getFirstBySelector("a.translate", mainField);
+    let actionLoader = getFirstBySelector("a.load", mainField);
+
+    const body = {
+      form_id: String(config.formId),
+      text: String(translatableRecordValue),
+      trigger_id: String(fieldId),
+      source_lang: String(config.contentLanguage),
+      target_lang: String(session.selectedLangId),
+    };
+
+    swapActiveClassName(
+      [actionLoader],
+      [actionBack, actionTranslate],
+      "action-hide",
+    );
+
+    return new Promise((resolve, reject) => {
+      fetch(`${moduleDefaults.baseUrl}${moduleDefaults.translationEndpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (
+            !data.form_id ||
+            !data.source_lang ||
+            !data.target_lang ||
+            !data.status ||
+            !data.translated_text ||
+            !data.trigger_id
+          ) {
+            swapActiveClassName(
+              [
+                actionBack,
+                actionTranslate,
+              ],
+              [actionLoader],
+              "action-hide",
+            );
+            reject("Returned data do not follow the structure.");
+          }
+
+          drupalFieldTypeController.setFieldData(
+            data.trigger_id,
+            data.translated_text,
+          );
+          fieldHistoryController.setHistoryData(fieldId);
+
+          swapActiveClassName(
+            [
+              actionBack,
+              actionTranslate,
+            ],
+            [actionLoader],
+            "action-hide",
+          );
+
+          resolve(data);
+        })
+        .catch((e) => {
+          swapActiveClassName(
+            [
+              actionBack,
+              actionTranslate,
             ],
             [actionLoader],
             "action-hide",

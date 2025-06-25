@@ -4,7 +4,7 @@ import {
   getFirstBySelector,
   getAllByClass,
   getAllBySelector,
-  getFirstByClass,
+  getFirstByClass, getById,
 } from "../Util/DocumentUtil";
 
 export default class DrupalFieldTypeController {
@@ -26,6 +26,14 @@ export default class DrupalFieldTypeController {
 
   getStringLongTypeElement = (subfield) => {
     return getFirstBySelector("textarea", subfield);
+  }
+
+  getStringTextareaTypeValue = (subfield) => {
+    return String(subfield.value);
+  }
+
+  getStringTextareaTypeElement = (subfield) => {
+    return getById(subfield.id);
   }
 
   getTextWithSummaryValue = (subfield) => {
@@ -130,6 +138,10 @@ export default class DrupalFieldTypeController {
     input.value = String(newValue);
   };
 
+  setStringTextareaTypeValue = (subfield, newValue) => {
+    subfield.value = String(newValue);
+  }
+
   setTextWithSummaryValue = (subfield, newValue) => {
     let textWithSummary = getAllBySelector(".form-textarea-wrapper", subfield);
     let textFieldWrapper = null;
@@ -213,11 +225,12 @@ export default class DrupalFieldTypeController {
   };
 
   setFieldData = (fieldId, newValue) => {
-    const subfield = getFirstByClass(fieldId);
+    const renderMode = window.transladeConfig.renderMode;
+    const subfield = renderMode === 'translation_table' ? getById(fieldId) : getFirstByClass(fieldId);
 
     if (!subfield) return;
 
-    const fieldTypeFull = Array.from(subfield.classList).find((className) =>
+    const fieldTypeFull = renderMode === 'translation_table' ? 'string_textarea' : Array.from(subfield.classList).find((className) =>
       className.startsWith("translade-type-"),
     );
 
@@ -226,6 +239,9 @@ export default class DrupalFieldTypeController {
     const fieldType = String(fieldTypeFull).replaceAll("translade-type-", "");
 
     switch (fieldType) {
+      case "string_textarea":
+        this.setStringTextareaTypeValue(subfield, newValue);
+        break;
       case "string":
         this.setStringTypeValue(subfield, newValue);
         break;

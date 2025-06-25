@@ -37,6 +37,7 @@ export default class ConfigurationManager {
         darkTheme: Boolean(parsedConfiguration.dark_theme),
         contentAIActions: contentAIActions,
         formId: String(parsedConfiguration.form_id),
+        renderMode: String(parsedConfiguration.render_mode).trim(),
         translationSet: null,
         history: {},
       };

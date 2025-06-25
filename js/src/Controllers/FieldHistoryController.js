@@ -2,20 +2,21 @@ import moduleDefaults from "../Defaults/ModuleDefaults";
 
 import DrupalFieldTypeController from "./DrupalFieldTypeController";
 
-import { getFirstByClass } from "../Util/DocumentUtil";
+import {getById, getFirstByClass} from "../Util/DocumentUtil";
 
 export default class FieldHistoryController {
   constructor() {}
 
   setHistoryData = (fieldId) => {
     const drupalFieldTypeController = new DrupalFieldTypeController();
+    const renderMode = window.transladeConfig.renderMode;
     let hist = window.transladeConfig.history;
     // get the item that has fieldId className, it contains the type of field
-    const subfield = getFirstByClass(fieldId);
+    const subfield = renderMode === 'translation_table' ? getById(fieldId) : getFirstByClass(fieldId);
 
     if (!subfield) return;
 
-    const fieldTypeFull = Array.from(subfield.classList).find((className) =>
+    const fieldTypeFull = renderMode === 'translation_table' ? 'string_textarea' : Array.from(subfield.classList).find((className) =>
       className.startsWith("translade-type-"),
     );
 
@@ -24,6 +25,9 @@ export default class FieldHistoryController {
     const fieldType = String(fieldTypeFull).replaceAll("translade-type-", "");
     let input = "";
     switch (fieldType) {
+      case "string_textarea":
+        input = drupalFieldTypeController.getStringTextareaTypeValue(subfield);
+        break;
       case "string":
         input = drupalFieldTypeController.getStringTypeValue(subfield);
         break;

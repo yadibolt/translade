@@ -23,7 +23,18 @@ import LanguageManager from "./Manager/LanguageManager";
     window.transladeConfig = new ConfigurationManager().initConfiguration();
     new SessionManager().initSession();
     await new LanguageManager().setTranslationSet(window.transladeConfig.contentLanguage.toString());
-    new RendererController().renderActionsForFields();
-    new EventListenerController().addEventListeners();
+
+    switch (window.transladeConfig.renderMode) {
+      case 'node_edit':
+      case 'node_create':
+      case 'taxonomy':
+        new RendererController().renderActionsForFields();
+        new EventListenerController().addEventListeners();
+        break;
+      case 'translation_table':
+        new RendererController().renderActionsForTranslationTableFields();
+        new EventListenerController().addEventListenersForTranslationTable();
+        break;
+    }
   };
 })(Drupal, once);

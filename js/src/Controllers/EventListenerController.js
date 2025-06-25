@@ -6,7 +6,7 @@ import DrupalFieldTypeController from "./DrupalFieldTypeController";
 import FieldHistoryController from "./FieldHistoryController";
 import SessionManager from "../Manager/SessionManager";
 
-import {getAllByClass, getFirstByClass, getFirstBySelector} from "../Util/DocumentUtil";
+import {getAllByClass, getAllBySelector, getFirstByClass, getFirstBySelector} from "../Util/DocumentUtil";
 
 export default class EventListenerController {
   inputWritesDelay = null;
@@ -25,6 +25,11 @@ export default class EventListenerController {
     this._evListLanguageChange();
     this._evLisAIActions();
     this._evLisInputChanged();
+  }
+
+  addEventListenersForTranslationTable() {
+    this._evLisBackActionTable();
+    this._evLisTranslateActionTable();
   }
 
   _evLisBackAction() {
@@ -47,6 +52,24 @@ export default class EventListenerController {
     });
   }
 
+  _evLisBackActionTable() {
+    const childNodes = new FieldsController().getTranslationTableFields();
+
+    childNodes.forEach((node, _) => {
+      const formWrapper = getFirstBySelector('.form-textarea-wrapper', getAllBySelector('td', node)[1]);
+      const textarea = getFirstBySelector('.form-textarea-wrapper textarea', getAllBySelector('td', node)[1]);
+      const textareaId = textarea.id;
+      const actionBack = getFirstBySelector("a.back", formWrapper);
+      if (!actionBack) return;
+
+      actionBack.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        new FieldHistoryController().restoreFromHistory(textareaId);
+      });
+    });
+  }
+
   _evLisTranslateAction() {
     const fields = new FieldsController().getShadowRootFields();
 
@@ -64,6 +87,24 @@ export default class EventListenerController {
         event.preventDefault();
 
         new APIController().translate(fieldId, field);
+      });
+    });
+  }
+
+  _evLisTranslateActionTable() {
+    const childNodes = new FieldsController().getTranslationTableFields();
+
+    childNodes.forEach((node, _) => {
+      const formWrapper = getFirstBySelector('.form-textarea-wrapper', getAllBySelector('td', node)[1]);
+      const textarea = getFirstBySelector('.form-textarea-wrapper textarea', getAllBySelector('td', node)[1]);
+      const textareaId = textarea.id;
+      const actionTranslate = getFirstBySelector("a.translate", formWrapper);
+      if (!actionTranslate) return;
+
+      actionTranslate.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        new APIController().translateTableField(textareaId, formWrapper);
       });
     });
   }

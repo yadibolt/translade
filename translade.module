@@ -76,51 +76,7 @@ function translade_form_alter(&$form, FormStateInterface $form_state, $form_id):
           'dark_theme' => $config->get('theme_dark') ?: FALSE,
           'content_language' => $language_id,
           'content_ai_actions' => $actions,
-          'form_id' => $form_id,
-        ]),
-        '#weight' => $weight++,
-      ];
-    }
-  }
-
-  $form_shorthand_type = "taxonomy_term_";
-  foreach ($config_taxonomy_types as $taxonomy_type) {
-    if ($form_id === $form_shorthand_type . $taxonomy_type . '_form') {
-      $form['#attached']['library'][] = 'translade/transladejs';
-      $form['#attached']['library'][] = 'translade/transladecss';
-
-      $form_entity = $form_state->getFormObject()->getEntity();
-      $definitions = $form_entity->getFieldDefinitions();
-
-      foreach ($definitions as $key => $value) {
-        $field_type = $value->getType();
-        if (in_array($field_type, $defaults_manager->getSupportedFieldTypes())) {
-          // change class for js rendering
-          $uid = Html::getClass($key . '-' . $form_entity->id() . '-' . time());
-          $form[$key]['#attributes']['class'][] = 'translade-field-' . $uid . ' translade-type-' . $field_type;
-          $form[$key]['translade_shadow_root'] = [
-            '#type' => 'markup',
-            '#markup' => '<div id=translade-shadow-root-'.$uid.'></div>',
-          ];
-        }
-      }
-
-      $form['translade_shadow_root_mount'] = [
-        '#type' => 'markup',
-        '#markup' => '<div id="translade-mount-shadow-root"></div>',
-        '#weight' => -100,
-      ];
-
-      $form['translade_shadow_root_config'] = [
-        '#type' => 'textarea',
-        '#attributes' => [
-          'id' => ['translade-shadow-root-config'],
-        ],
-        '#value' => json_encode([
-          'languages' => $config->get('languages') ?: [],
-          'dark_theme' => $config->get('theme_dark') ?: FALSE,
-          'content_language' => $language_id,
-          'content_ai_actions' => $actions,
+          'render_mode' => 'node_edit',
           'form_id' => $form_id,
         ]),
         '#weight' => $weight++,
@@ -166,6 +122,82 @@ function translade_form_alter(&$form, FormStateInterface $form_state, $form_id):
         'dark_theme' => $config->get('theme_dark') ?: FALSE,
         'content_language' => $language_id,
         'content_ai_actions' => $actions,
+        'render_mode' => 'node_create',
+        'form_id' => $form_id,
+      ]),
+      '#weight' => $weight++,
+    ];
+  }
+
+  $form_shorthand_type = "taxonomy_term_";
+  foreach ($config_taxonomy_types as $taxonomy_type) {
+    if ($form_id === $form_shorthand_type . $taxonomy_type . '_form') {
+      $form['#attached']['library'][] = 'translade/transladejs';
+      $form['#attached']['library'][] = 'translade/transladecss';
+
+      $form_entity = $form_state->getFormObject()->getEntity();
+      $definitions = $form_entity->getFieldDefinitions();
+
+      foreach ($definitions as $key => $value) {
+        $field_type = $value->getType();
+        if (in_array($field_type, $defaults_manager->getSupportedFieldTypes())) {
+          // change class for js rendering
+          $uid = Html::getClass($key . '-' . $form_entity->id() . '-' . time());
+          $form[$key]['#attributes']['class'][] = 'translade-field-' . $uid . ' translade-type-' . $field_type;
+          $form[$key]['translade_shadow_root'] = [
+            '#type' => 'markup',
+            '#markup' => '<div id=translade-shadow-root-'.$uid.'></div>',
+          ];
+        }
+      }
+
+      $form['translade_shadow_root_mount'] = [
+        '#type' => 'markup',
+        '#markup' => '<div id="translade-mount-shadow-root"></div>',
+        '#weight' => -100,
+      ];
+
+      $form['translade_shadow_root_config'] = [
+        '#type' => 'textarea',
+        '#attributes' => [
+          'id' => ['translade-shadow-root-config'],
+        ],
+        '#value' => json_encode([
+          'languages' => $config->get('languages') ?: [],
+          'dark_theme' => $config->get('theme_dark') ?: FALSE,
+          'content_language' => $language_id,
+          'content_ai_actions' => $actions,
+          'render_mode' => 'taxonomy',
+          'form_id' => $form_id,
+        ]),
+        '#weight' => $weight++,
+      ];
+    }
+  }
+
+  // /admin/config/regional/translate
+  $form_storthand_type = 'locale_translate_edit_form';
+  if ($form_id === $form_storthand_type) {
+    $form['#attached']['library'][] = 'translade/transladejs';
+    $form['#attached']['library'][] = 'translade/transladecss';
+
+    $form['translade_shadow_root_mount'] = [
+      '#type' => 'markup',
+      '#markup' => '<div id="translade-mount-shadow-root"></div>',
+      '#weight' => -100,
+    ];
+
+    $form['translade_shadow_root_config'] = [
+      '#type' => 'textarea',
+      '#attributes' => [
+        'id' => ['translade-shadow-root-config'],
+      ],
+      '#value' => json_encode([
+        'languages' => $config->get('languages') ?: [],
+        'dark_theme' => $config->get('theme_dark') ?: FALSE,
+        'content_language' => $language_id,
+        'content_ai_actions' => null,
+        'render_mode' => 'translation_table',
         'form_id' => $form_id,
       ]),
       '#weight' => $weight++,

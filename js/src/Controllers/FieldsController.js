@@ -1,4 +1,5 @@
 import ExceptionManager from "../Manager/ExceptionManager";
+import {getFirstBySelector} from "../Util/DocumentUtil";
 
 export default class FieldsController {
   constructor() {}
@@ -15,5 +16,18 @@ export default class FieldsController {
       );
 
     return fields;
+  }
+
+  getTranslationTableFields() {
+    const tableBody = getFirstBySelector("#edit-strings tbody");
+
+    if (!tableBody) {
+      return;
+    }
+
+    const childNodes = Array.from(tableBody.childNodes).filter((node) => node.nodeName === "TR");
+    if (childNodes.length > 0) return childNodes;
+
+    return null;
   }
 }

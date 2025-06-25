@@ -155,4 +155,57 @@ export default class ActionsController {
 
     return wrapper;
   }
+
+  createActionsForTranslationTableField(fieldId) {
+    const themeClassName = window.transladeConfig.darkTheme ? "dark" : "light";
+
+    const wrapper = new DivTag({
+      classNames: ["translade-actions-wrapper", themeClassName],
+    }).getDefault();
+    const backIcon = new ImageTag({
+      src: `${moduleDefaults.assetsFolder}/icons/back.svg`,
+      alt: this.tSet.back,
+    }).getDefault();
+    const translateIcon = new ImageTag({
+      src: `${moduleDefaults.assetsFolder}/icons/translate.svg`,
+      alt: this.tSet.translate,
+    }).getDefault();
+    const loaderIcon = new SpanTag({ classNames: ["loader"] }).getDefault();
+
+    const aBack = new ATag({
+      classNames: ["translade-action-trigger", "back"],
+      title: this.tSet.backToPreviousText,
+      dataset: {
+        targetField: fieldId,
+      },
+    }).getDefault();
+    aBack.appendChild(backIcon);
+    const aTranslate = new ATag({
+      classNames: ["translade-action-trigger", "translate"],
+      title: this.tSet.translateText,
+      dataset: {
+        targetField: fieldId,
+      },
+    }).getDefault();
+    aTranslate.appendChild(translateIcon);
+
+    const aLoader = new ATag({
+      classNames: ["translade-action-trigger", "load", "action-hide"],
+      title: this.tSet.loading,
+      dataset: {
+        targetField: fieldId,
+      },
+    }).getDefault();
+    aLoader.appendChild(loaderIcon);
+
+    [
+      aBack,
+      aTranslate,
+      aLoader,
+    ].forEach((children, _) => {
+      wrapper.appendChild(children);
+    });
+
+    return wrapper;
+  }
 }
