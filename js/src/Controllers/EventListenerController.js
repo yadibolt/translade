@@ -9,7 +9,15 @@ import SessionManager from "../Manager/SessionManager";
 import {getAllByClass, getFirstByClass, getFirstBySelector} from "../Util/DocumentUtil";
 
 export default class EventListenerController {
-  constructor() {}
+  inputWritesDelay = null;
+  inputWrites = null;
+
+  constructor() {
+    this.inputWritesDelay = 500;
+    this.inputWrites = {
+      inputFields: null,
+    }
+  }
 
   addEventListeners() {
     this._evLisBackAction();
@@ -193,8 +201,38 @@ export default class EventListenerController {
       }
 
       if (element) {
-        // TODO add event listener for input change
+        let hasSummaryOrText = false;
+
+        if (element.summary) {
+          this._setInputWrites(fieldId, element.summary);
+          hasSummaryOrText = true;
+        }
+        if (element.text) {
+          const neighbor = getFirstBySelector('div.ck.ck-content', element.text.parentElement);
+          if (neighbor) {
+            this._setInputWrites(fieldId, neighbor);
+          }
+          hasSummaryOrText = true;
+        }
+
+        if (!hasSummaryOrText) {
+          this._setInputWrites(fieldId, element);
+        }
       }
     })
+  }
+
+  _setInputWrites(fieldId, element) {
+    const actionFn = (_) => {
+      console.log(element);
+      clearTimeout(this.inputWrites.inputFields);
+
+      this.inputWrites.inputFields = setTimeout(() => {
+        new FieldHistoryController().setHistoryData(fieldId);
+        console.log(window.transladeConfig.history);
+      }, this.inputWritesDelay);
+    }
+
+    element.addEventListener('keyup', actionFn);
   }
 }

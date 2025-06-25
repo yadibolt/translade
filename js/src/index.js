@@ -20,12 +20,10 @@ import LanguageManager from "./Manager/LanguageManager";
   };
 
   const initModuleScript = async () => {
-    let rendererController = new RendererController();
-
     window.transladeConfig = new ConfigurationManager().initConfiguration();
     new SessionManager().initSession();
     await new LanguageManager().setTranslationSet(window.transladeConfig.contentLanguage.toString());
-    rendererController.renderActionsForFields();
+    new RendererController().renderActionsForFields();
     new EventListenerController().addEventListeners();
   };
 })(Drupal, once);

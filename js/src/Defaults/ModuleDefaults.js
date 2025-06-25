@@ -4,7 +4,7 @@ const moduleDefaults = {
   assetsFolder: "/modules/translade",
   localesFolder: "/modules/translade/locales",
   selectedLangIdDefault: "default",
-  maximumHistoryLength: 10,
+  maximumHistoryLength: 50,
   specialToken: "|TRSLD_SPT|",
   baseUrl: "/api/translade",
   translationEndpoint: "/translate",
