@@ -5,7 +5,7 @@
 ## Features
 
 - **AI-Powered Translations**
-  Automatically translates all text-based fields using OpenAI (Google support coming soon).
+  Automatically translates all text-based fields using OpenAI, Google Gemini.
 
 - **Content Transformation Options**
   Choose from improvements like summarization, condensation, and tone adjustment. (There are more options than that)
