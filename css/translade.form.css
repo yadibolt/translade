@@ -214,3 +214,17 @@ label.translade-label {
 .translade-actions-wrapper.light a.translade-action-trigger:hover {
   background-color: #e5e5e5;
 }
+
+/* Table Fields */
+table#edit-strings {
+  .form-textarea-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+
+    .translade-actions-wrapper {
+      max-height: 32.75px;
+    }
+  }
+}

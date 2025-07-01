@@ -15,6 +15,13 @@ class PromptManager {
     return $this->formatPrompt($prompt, $tokens);
   }
 
+  public function getTableTranslationPrompt(array $tokens = []): string {
+    $prompt = $this->_getTranslationRoleDefinition();
+    $prompt .= $this->_getTableTranslationPromptDefault();
+
+    return $this->formatPrompt($prompt, $tokens);
+  }
+
   public function getRephrasePrompt(array $tokens = []): string {
     $prompt = $this->_getRephraseRoleDefinition();
     $prompt .= $this->_getRephrasePromptDefault();
@@ -132,6 +139,15 @@ class PromptManager {
     - Pay close attention to proper nouns like names, places, or organizations — they are often Slovak and may remain untranslated.";
   }
 
+  private function _getTableTranslationPromptDefault(): string {
+    return "- Translate only the text content; do not modify or remove any HTML tags, special characters, or formatting.
+    - Translate the content from @source_lang to @target_lang.
+    - Do not prepend or append any extra text to the translation.
+    - The translation must be accurate and preserve the original meaning.
+    - If the content is already in @target_lang, do not translate it again.
+    - Pay close attention to proper nouns like names, places, or organizations — they are often Slovak and may remain untranslated.";
+  }
+
   private function _getRephrasePromptDefault(): string {
     return "- Rephrase the text content; do not modify or remove any HTML tags, special characters, or formatting.
     - Do not prepend or append any extra text to the rephrased content.
@@ -184,7 +200,7 @@ class PromptManager {
     $token_prompt = $prompt;
 
     foreach ($tokens as $token => $value) {
-      $token_prompt = str_replace($token, $this->language_manager->getLangFromId($value), $token_prompt);
+      $token_prompt = str_replace($token, $this->language_manager->getLangFromId($value) ?? $value, $token_prompt);
     }
 
     return $token_prompt;

@@ -29,12 +29,15 @@ class APIController extends ControllerBase {
     $trigger_id = $content['trigger_id'] ?? '';
     $source_lang = $content['source_lang'] ?? '';
     $target_lang = $content['target_lang'] ?? '';
+    $force_translation_languages = $content['force_translation_languages'] ?? false;
 
     if (empty($form_id) || empty($text) || empty($source_lang) || empty($target_lang) || empty($trigger_id)) {
       return new JsonResponse(['error' => 'Missing required parameters'], 400);
     }
 
-    $prompt = $this->prompt_manager->getTranslationPrompt([
+    $prompt = !$force_translation_languages ? $this->prompt_manager->getTranslationPrompt([
+      '@target_lang' => $target_lang,
+    ]) : $this->prompt_manager->getTableTranslationPrompt([
       '@source_lang' => $source_lang,
       '@target_lang' => $target_lang,
     ]);
@@ -56,6 +59,7 @@ class APIController extends ControllerBase {
       'target_lang' => $target_lang,
       'trigger_id' => $trigger_id,
       'timestamp' => time(),
+      'prompt_used' => $prompt,
     ], 200);
   }
 

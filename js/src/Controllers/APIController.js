@@ -119,11 +119,16 @@ export default class APIController {
     // fieldId.split('-')[2] => ID
     let translatableRecord = getById(`edit-strings-${fieldId.split('-')[2]}-original`);
     if (!translatableRecord) return;
-    const translatableRecordValue = translatableRecord.value;
-    // TODO
-    const langOriginal = translatableRecord.parentNode.lang;
+    let translatableRecordValue = translatableRecord.innerHTML;
 
-    console.log(langOriginal);
+    // get rid of HTML elements and contents within it + comments to get plain text
+    translatableRecordValue = translatableRecordValue.replace(/<!--[\s\S]*?-->/g, "");
+    translatableRecordValue = translatableRecordValue.replace(/<[^>]+>[\s\S]*?<\/[^>]+>/g, "");
+    translatableRecordValue = translatableRecordValue.replace(/<[^>]+>/g, "");
+    translatableRecordValue = translatableRecordValue.replaceAll('\n', '').trim();
+
+    const langOriginal = translatableRecord.parentNode.lang;
+    const langTarget = document.getElementById("edit-strings-1-translations-0").lang;
 
     let actionBack = getFirstBySelector("a.back", mainField);
     let actionTranslate = getFirstBySelector("a.translate", mainField);
@@ -133,8 +138,9 @@ export default class APIController {
       form_id: String(config.formId),
       text: String(translatableRecordValue),
       trigger_id: String(fieldId),
-      source_lang: String(config.contentLanguage),
-      target_lang: String(session.selectedLangId),
+      source_lang: String(langOriginal),
+      target_lang: String(langTarget),
+      force_translation_languages: true,
     };
 
     swapActiveClassName(
