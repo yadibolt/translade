@@ -174,6 +174,8 @@ class SettingsForm extends ConfigFormBase {
       '#weight' => $weight++,
     ];
 
+    // TODO: Follow this structure always: en:English:English,sk:Slovenčina:Slovak,cz:Čeština:Czech
+
     $form['theme_options'] = [
       '#type' => 'details',
       '#title' => $this->t('Theme Options'),
